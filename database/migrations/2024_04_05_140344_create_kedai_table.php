@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kedai', function (Blueprint $table) {
-            $table->id();
+        Schema::create('kedais', function (Blueprint $table) {
+            $table->uuid('id')->primary();
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->integer('no_whatsapp');
             $table->string('alamat');
             $table->string('latitude')->nullable();
             $table->string('longitude')->nullable();
+            $table->integer('status');
             $table->timestamps();
         });
     }

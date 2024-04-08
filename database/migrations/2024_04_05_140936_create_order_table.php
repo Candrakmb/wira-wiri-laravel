@@ -11,8 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->uuid('pelanggan_id');
+            $table->foreign('pelanggan_id')->references('id')->on('pelanggans')->onDelete('cascade');
+            $table->uuid('driver_id');
+            $table->foreign('driver_id')->references('id')->on('drivers')->onDelete('cascade');
+            $table->string('invoice_number');
+            $table->bigInteger('total_pay');
+            $table->integer('status_pembayaran')->comment('0 = Belum Bayar','1 = Sudah Bayar','3 = Kadaluarsa')->nullable();
+            $table->integer('metode_pembayaran')->comment('0 = cod','1 = midtrans')->nullable();
+            $table->timestamp('paid_at')->nullable();
+            $table->string('snap_token')->nullable();
+            $table->string('subtotal');
+            $table->integer('status_order')->comment('0 = diproses','1 = dikirim','3 = selesai')->nullable();
             $table->timestamps();
         });
     }

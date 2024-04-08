@@ -11,8 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('menu_kedai', function (Blueprint $table) {
+        Schema::create('menus', function (Blueprint $table) {
             $table->id();
+            $table->uuid('kedai_id');
+            $table->foreign('kedai_id')->references('id')->on('kedais')->onDelete('cascade');
+            $table->string('nama');
+            $table->text('deskripsi');
+            $table->integer('harga');
+            $table->string('gambar');
+            $table->integer('status');
             $table->timestamps();
         });
     }
