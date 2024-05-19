@@ -5,12 +5,12 @@
 
 @section('content')
     @if($type == "index")
-        @include('user.table')
+        @include('menu.table')
     @else
-        @include('user.form')
+        @include('menu.form')
     @endif
 @stop
 
 @push('after-scripts')
-    @include('user.script')
+    @include('menu.script')
 @endpush

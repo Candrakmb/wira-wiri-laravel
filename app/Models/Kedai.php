@@ -6,10 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Pelanggan extends Model
+class Kedai extends Model
 {
     use HasFactory;
-
     /**
      * Indicates if the IDs are auto-incrementing.
      *
@@ -32,9 +31,12 @@ class Pelanggan extends Model
     protected $fillable = [
         'id',
         'no_whatsapp',
-        'img_profil'
+        'alamat',
+        'latitude',
+        'longitude',
+        'status',    
     ];
-
+    
    
     /**
      * Boot function from laravel.
@@ -46,9 +48,9 @@ class Pelanggan extends Model
             $model->id = (string) Str::uuid();
         });
     }
-
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
     }
+
 }

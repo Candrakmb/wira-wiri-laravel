@@ -68,5 +68,18 @@ class User extends Authenticatable
             $model->id = (string) Str::uuid();
         });
     }
+
+    public function driver()
+    {
+        return $this->hasMany(Driver::class,'user_id','id');
+    }
+    public function kedai()
+    {
+        return $this->hasMany(Kedai::class,'user_id','id');
+    }
+    public function pelanggan()
+    {
+        return $this->hasMany(Pelanggan::class,'user_id','id');
+    }
 }
 

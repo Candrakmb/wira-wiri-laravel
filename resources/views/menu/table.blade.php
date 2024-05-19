@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-12">
       <div class="col text-right" style="margin: 0 -3em 0 0;">
-          <a href="/user/create" type="button" class="btn btn-primary btn-data" id="btn-create" style="margin: 1em 0 0 0;">
+          <a href="/menu/create" type="button" class="btn btn-primary btn-data" id="btn-create" style="margin: 1em 0 0 0;">
               <i class="fa fa-plus-square"></i> <span>Tambah</span>
           </a>
       </div>      
@@ -25,11 +25,12 @@
                 <thead>
                   <tr>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">no</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">name</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">email</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">kedai</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Nomor Whatsapp</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Alamat</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Jumlah Menu</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">aksi</th>
-                    {{-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Employed</th>
-                    <th class="text-secondary opacity-7"></th> --}}
                   </tr>
                 </thead>
                 <tbody>

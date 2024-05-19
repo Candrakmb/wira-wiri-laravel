@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,11 +17,38 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('layouts.app');
+    return view('auth.sign-up');
 });
 Route::get('/signup', function () {
-    return view('auth.sign-up');
+    
 });
 Route::get('/signin', function () {
     return view('auth.sign-in');
+});
+
+
+Route::prefix('user')->name('user.')->group(function(){
+    Route::get('/',[UserController::class,'user'])->name('user');
+    Route::post('/table', [UserController::class, 'table'])->name('table');
+    Route::get('/create',[UserController::class,'create'])->name('create');
+    Route::get('/update/{id}',[UserController::class,'update'])->name('update');
+    Route::post('/updateform',[UserController::class,'updateform'])->name('updateform');
+    Route::post('/createform',[UserController::class,'createform'])->name('createform');
+    Route::post('/deleteform',[UserController::class,'deleteform'])->name('deleteform');
+});
+
+Route::prefix('menu')->name('menu.')->group(function(){
+    Route::get('/',[MenuController::class,'menu'])->name('menu');
+    Route::post('/table', [MenuController::class, 'table'])->name('table');
+    Route::get('/create',[MenuController::class,'create'])->name('create');
+    Route::get('/update/{id}',[MenuController::class,'update'])->name('update');
+    Route::post('/updateform',[MenuController::class,'updateform'])->name('updateform');
+    Route::post('/createform',[MenuController::class,'createform'])->name('createform');
+    Route::post('/deleteform',[MenuController::class,'deleteform'])->name('deleteform');
+});
+
+Route::prefix('order')->name('order.')->group(function(){
+    Route::get('/',[OrderController::class,'order'])->name('order');
+    Route::post('/table', [OrderController::class, 'table'])->name('table');
+    Route::get('/lihat/{id}',[OrderController::class,'lihat'])->name('lihat');
 });

@@ -31,6 +31,7 @@ class Driver extends Model
     protected $fillable = [
         'id',
         'no_whatsapp',
+        'img_profil'
     ];
 
    
@@ -43,5 +44,10 @@ class Driver extends Model
         static::creating(function ($model) {
             $model->id = (string) Str::uuid();
         });
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id');
     }
 }
