@@ -566,7 +566,7 @@
 /* card proses */
 .card-proses{
     position: absolute;
-    top: 40%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 400;
@@ -597,18 +597,17 @@
 }
 /* card detail */
 .card-detail{
-   position: absolute;
-    top: 45%;
+    position: absolute;
+    top: 50%;
     z-index: 1000;
     padding: 12px;
     width: 95%;
     display: flex;
     align-items: center;
-    height: 53%;
+    height: 48%;
     border-radius: 30px;
-    background: #ffffff;
-    overflow: hidden;
+    background: #f3f3f3;
+    overflow: hidden
 }
-
-
+/* card driver */
 </style>

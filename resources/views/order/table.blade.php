@@ -70,13 +70,20 @@
                 <div class="card-int">
                     <div class="row ">
                         <div class="col-md-12 justify-content-center">
-                            <div id="map" style="height: 300px;"></div>
+                            <div id="map" style="height: 350px;"></div>
                             <div class="card-proses" >
                                 <div class="proses__icon"><img src="{{asset('/assets/icon_maps/cooking.gif')}}" alt=""></div>
                                 <div class="proses__title">Makananmu Sedang Dimasak</div>
                             </div>
                             <div class="card-detail" >
-                                <div class="detail-title"></div>
+                                <div class="card">
+                                    <img class="card-img-top" src="" alt="Title" />
+                                    <div class="card-body">
+                                        <h4 class="card-title">Title</h4>
+                                        <p class="card-text">Body</p>
+                                    </div>
+                                </div>
+                                                             
                             </div>
                         </div>
                     </div>

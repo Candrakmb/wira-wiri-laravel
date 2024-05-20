@@ -23,13 +23,12 @@
             <div class="table-responsive">
               <table class="table align-items-center mb-0" id="table" style="width: 100%;">
                 <thead>
-                  <tr>
+                  <tr class="text-center">
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">no</th>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">name</th>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">email</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Role</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">aksi</th>
-                    {{-- <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Employed</th>
-                    <th class="text-secondary opacity-7"></th> --}}
                   </tr>
                 </thead>
                 <tbody>

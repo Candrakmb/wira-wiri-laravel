@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
@@ -16,19 +17,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('auth.sign-up');
-});
-Route::get('/signup', function () {
-    
-});
-Route::get('/signin', function () {
-    return view('auth.sign-in');
-});
+Route::middleware(['auth'])->group(function () {
+Route::get('/dashboard',[DashboardAdminController::class,'index'])->name('admin.dashboard');
 
 
 Route::prefix('user')->name('user.')->group(function(){
-    Route::get('/',[UserController::class,'user'])->name('user');
+    Route::get('/',[UserController::class,'user'])->name('user.index');
     Route::post('/table', [UserController::class, 'table'])->name('table');
     Route::get('/create',[UserController::class,'create'])->name('create');
     Route::get('/update/{id}',[UserController::class,'update'])->name('update');
@@ -52,3 +46,7 @@ Route::prefix('order')->name('order.')->group(function(){
     Route::post('/table', [OrderController::class, 'table'])->name('table');
     Route::get('/lihat/{id}',[OrderController::class,'lihat'])->name('lihat');
 });
+
+});
+
+require __DIR__ . '/auth.php';

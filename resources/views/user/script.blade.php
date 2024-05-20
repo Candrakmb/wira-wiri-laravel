@@ -64,6 +64,11 @@
                         class: 'text-left'
                     },
                     {
+                        data: 'role',
+                        name: 'role',
+                        class: 'text-left'  
+                    },
+                    {
                         data: 'action',
                         name: 'action',
                         class: 'text-center',
@@ -700,7 +705,7 @@
                     });
             });
         }
-
+        @if ($type == 'index')
         var map = function (){
             var map = L.map('map').setView([-7.152186, 111.883674],15);
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -715,6 +720,7 @@
                 }
             });
 
+           
             const greenIcon = new LeafIcon({iconUrl: '/assets/icon_maps/restaurant.png'});
             let driverMaps = @json($driver_maps);
             driverMaps.forEach(item => {
@@ -733,7 +739,7 @@
                 L.marker([item.latitude, item.longitude], {icon: greenIcon}).addTo(map).bindPopup(popupContent);
             });
         }
-
+        @endif
         return {
             init: function() {
                 @if ($type == 'index')
