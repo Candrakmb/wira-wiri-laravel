@@ -129,6 +129,11 @@
                 <p class="help-block" style="display: none;"></p>
               </div>
               <div class="col-md-6 mt-2">
+                <label for="no_plat" class="label1">Plat Nomer</label><span class="required">*</span>
+                <input type="text" id="no_plat" placeholder="Silahkan Masukkan" name="no_plat" class="form-control input" value="{{$driver->no_plat}}" required>
+                <p class="help-block" style="display: none;"></p>
+                </div>
+              <div class="col-md-6 mt-2">
               <label for="jenis_kelamin" class="label1">Jenis Kelamin</label><span class="required">*</span>
               <select name="jenis_kelamin" id="jenis_kelamin" class="form-select select jenis_kelamin">
                 <option value="" readonly>pilih....</option>

@@ -54,28 +54,28 @@
                         searchable: false
                     },
                     {
-                        data: 'user.name',
-                        name: 'user.name',
+                        data: 'invoice_number',
+                        name: 'invoice_number',
                         class: 'text-left'
                     },
                     {
-                        data: 'no_whatsapp',
-                        name: 'no_whatsapp',
+                        data: 'pelanggan',
+                        name: 'pelanggan',
                         class: 'text-left'
                     },
                     {
-                        data: 'alamat',
-                        name: 'alamat',
+                        data: 'driver',
+                        name: 'driver',
                         class: 'text-left'
                     },
                     {
-                        data: 'status_name',
-                        name: 'status_name',
+                        data: 'pembayaran',
+                        name: 'pembayaran',
                         class: 'text-left',
                     },
                     {
-                        data: 'jumlah_menu',
-                        name: 'jumlah_menu',
+                        data: 'status',
+                        name: 'status',
                         class: 'text-left'
                     },
                     {
@@ -152,7 +152,7 @@
                 $('#table').DataTable().ajax.reload();
             });
         }
-
+        @if($type == 'index')
         var map = function (){
             var map = L.map('map', {
                 center: [-7.152186, 111.883674],
@@ -165,15 +165,16 @@
                 subdomains:['mt0','mt1','mt2','mt3']
             }).addTo(map);
         }
-
+        @endif
         return {
             init: function() {
                 @if ($type == 'index')
                     table();
                     muatUlang();
+                    map()
                 @endif
                 setData();
-                map()
+               
             }
         }
     }();

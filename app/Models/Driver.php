@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -49,5 +50,18 @@ class Driver extends Model
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
+
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class,'driver_id','id');
+    }
+
+    public function getTimeDifferenceAttribute()
+    {
+        $timeOne = Carbon::parse($this->time_on);
+        $now = Carbon::now();
+        $differenceInMinutes = $timeOne->diffInMinutes($now);
+        return $differenceInMinutes / 60;
     }
 }

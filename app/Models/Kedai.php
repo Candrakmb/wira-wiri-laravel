@@ -36,6 +36,7 @@ class Kedai extends Model
         'longitude',
         'status',    
     ];
+    protected $appends = ['distance'];
     
    
     /**
@@ -51,6 +52,21 @@ class Kedai extends Model
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
+
     }
 
+    public function menu()
+    {
+        return $this->hasMany(Menu::class,'kedai_id','id');
+    }
+    public function getDistanceAttribute()
+{
+    // Mengembalikan nilai default jika 'distance' tidak ada
+    return $this->attributes['distance'] ?? null;
+}
+
+    public function setDistanceAttribute($value)
+    {
+        $this->attributes['distance'] = $value;
+    }
 }

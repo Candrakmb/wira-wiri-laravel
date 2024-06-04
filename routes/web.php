@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('/', [AuthenticatedSessionController::class, 'create'])
+                ->name('login');
 
 Route::middleware(['auth'])->group(function () {
 Route::get('/dashboard',[DashboardAdminController::class,'index'])->name('admin.dashboard');

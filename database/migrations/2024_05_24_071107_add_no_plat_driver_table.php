@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_details', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id')->constrained()->onDelete('cascade');
-            $table->string('catatan')->nullable();
-            $table->integer('qty');
-            $table->timestamps();
+        Schema::table('drivers', function (Blueprint $table) {
+            $table->string('no_plat')->nullable();
         });
     }
 
@@ -25,6 +21,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_detail');
+        //
     }
 };

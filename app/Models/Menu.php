@@ -20,7 +20,7 @@ class Menu extends Model
     }
     public function kategori_menu()
     {
-        return $this->hasMany(KategoriPilihan::class,'menu_id','id');
+        return $this->hasMany(KategoriPilihMenu::class,'menu_id','id');
     }
 
 }

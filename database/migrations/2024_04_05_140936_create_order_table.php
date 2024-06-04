@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->uuid('pelanggan_id');
             $table->foreign('pelanggan_id')->references('id')->on('pelanggans')->onDelete('cascade');
-            $table->uuid('driver_id');
+            $table->uuid('driver_id')->nullable();
             $table->foreign('driver_id')->references('id')->on('drivers')->onDelete('cascade');
-            $table->string('invoice_number');
+            $table->string('invoice_number')->unique();
             $table->bigInteger('total_pay');
             $table->integer('status_pembayaran')->comment('0 = Belum Bayar','1 = Sudah Bayar','3 = Kadaluarsa')->nullable();
             $table->integer('metode_pembayaran')->comment('0 = cod','1 = midtrans')->nullable();

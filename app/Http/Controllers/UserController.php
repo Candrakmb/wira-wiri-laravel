@@ -130,6 +130,7 @@ class UserController extends Controller
                                         'alamat',
                                         'tgl_lhr',
                                         'jenis_kelamin',
+                                        'no_plat',
                                     ]
                                 );
                                 $userDriver = new User();
@@ -147,6 +148,7 @@ class UserController extends Controller
                                 $driver->tanggal_lahir = $dataRole['tgl_lhr'][$key];
                                 $driver->jenis_kelamin = $dataRole['jenis_kelamin'][$key];
                                 $driver->alamat = $dataRole['alamat'][$key];
+                                $driver->no_plat = $dataRole['no_plat'][$key];
                                 $driver->status= '0';
                                 $driver->save();
 
@@ -235,7 +237,7 @@ class UserController extends Controller
                 $user->name = $request->name;
                 $user->email = $request->email;
                 if( $request->password != null){
-                    $user->password = $request->password;
+                    $user->password = Hash::make($request->password);
                 }
                 $user->save();
                 if($role == 'pelanggan'){
@@ -246,6 +248,7 @@ class UserController extends Controller
                     $driver = Driver::findOrFail($request->id);
                     $driver->no_whatsapp = $request->no_wa;
                     $driver->alamat = $request->alamat;
+                    $driver->no_plat = $request->no_plat;
                     $driver->tanggal_lahir = $request->tanggal_lahir;
                     $driver->jenis_kelamin = $request->jenis_kelamin;
                     $driver->save();

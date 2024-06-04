@@ -14,4 +14,10 @@ class KategoriPilihMenu extends Model
     {
         return $this->belongsTo(Menu::class,'menu_id');
     }
+
+    public function menuDetail()
+    {
+        return $this->hasMany(MenuDetail::class,'kategori_pilih_menu_id','id');
+    }
+
 }

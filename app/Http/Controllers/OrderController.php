@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Driver;
 use App\Models\Menu;
 use App\Models\Order;
+use App\Models\OrderDestination;
+use App\Models\OrderDetail;
+use App\Models\OrderDetailEkstra;
+use App\Models\Pelanggan;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -20,53 +25,81 @@ class OrderController extends Controller
     	return view($this->data['modul'].'.index', $this->data);
     }
 
-    function lihat(){
+    function lihat($id){
         $this->data['type'] = "lihat";
+        $this->data['data'] = null;
+        $this->data['order'] = Order::where('invoice_number',$id)->first();
+        $this->data['orderDetail'] = OrderDetail::with(['menu','orderEkstra'])->where('order_id',$this->data['order']->id)->get();
+        $this->data['orderDestinasi'] = OrderDestination::with(['alamatPelanggan','kedai'])->where('order_id',$this->data['order']->id)->get();
+        // dd($this->data['orderDetail']);
+        $this->data['driver'] = Driver::with('user')->where('id',$this->data['order']->driver_id)->first();
+        $this->data['pelanggan'] = Pelanggan::with('user')->where('id',$this->data['order']->pelanggan_id)->first();
     	return view($this->data['modul'].'.index', $this->data);
     }
 
 
-    function table(){
-        $query = Order::with(['pelanggan','driver'])
-                ->orderBy('kedais.id','desc');
-        $query = $query->get();
-        return DataTables::of($query)
+    function table() {
+        $orders = Order::orderBy('id', 'desc')->get();
+        return DataTables::of($orders)
             ->addIndexColumn()
-            ->addColumn('action', function($row){
-                $btn = '';
-                $btn .= '<div class="text-center">';
-                $btn .= '<div class="btn-group btn-group-solid mx-3">';
-                $btn .= '<a class="btn btn-warning ml-1" href="/menu/update/'.$row->id.'" title="Update"><i class="fa fa-edit"></i></a> &nbsp';
-                $btn .= '<button class="btn btn-danger btn-raised btn-xs" id="btn-hapus" title="hapus semua menu"><i class="fa fa-trash"></i></button>';
-                $btn .= '</div>';    
-                $btn .= '</div>';
-                return $btn;
+            ->addColumn('action', function($row) {
+                return '<div class="text-center">
+                            <div class="btn-group btn-group-solid mx-3">
+                                <a class="btn btn-warning ml-1" href="/order/lihat/'.$row->invoice_number.'" title="lihat">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>';
             })
-            ->addColumn('jumlah_menu', function($row){
-                $jumlah = Menu::where('kedai_id', $row->id)->count();
-                $jml = '';
-                $jml .= '<div class="text-center">';
-                $jml .= '<div class="btn-group btn-group-solid mx-3">';
-                $jml .= '<p>'.$jumlah.'</p>';
-                $jml .= '</div>';    
-                $jml .= '</div>';
-                return $jml;
+            ->addColumn('pembayaran', function($row) {
+                $paymentMethod = [
+                    '0' => '<div class="badge rounded-pill bg-info">COD</div>',
+                    '1' => '<div class="badge rounded-pill bg-primary">Midtrans</div>'
+                ];
+                $pembayaran = isset($paymentMethod[$row->metode_pembayaran]) ? 
+                    $paymentMethod[$row->metode_pembayaran] : 
+                    '<div class="badge rounded-pill bg-secondary">Unknown</div>';
+                return '<div class="text-center">
+                            <div class="btn-group btn-group-solid mx-3">
+                                '.$pembayaran.'
+                            </div>
+                        </div>';
             })
-            ->addColumn('status_name', function($row){
-                $status = ''; 
-                $status .= '<div class="text-center">';
-                $status .= '<div class="btn-group btn-group-solid mx-3">';
-                if ($row->status == 0) {
-                    $status .= '<div class="badge rounded-pill bg-danger">Tutup</div>';
-                }
-                if ($row->status == 1) {
-                    $status .= '<div class="badge rounded-pill bg-success">Buka</div>';
-                }
-                $status .= '</div>';    
-                $status .= '</div>';
-                return $status;
+            ->addColumn('status', function($row) {
+                $orderStatus = [
+                    '0' => '<div class="badge rounded-pill bg-info">Proses</div>',
+                    '1' => '<div class="badge rounded-pill bg-primary">Antar</div>',
+                    '2' => '<div class="badge rounded-pill bg-success">Selesai</div>',
+                    '3' => '<div class="badge rounded-pill bg-danger">Batal</div>'
+                ];
+                $status = isset($orderStatus[$row->status_order]) ? 
+                    $orderStatus[$row->status_order] : 
+                    '<div class="badge rounded-pill bg-secondary">Pembayaran</div>';
+                return '<div class="text-center">
+                            <div class="btn-group btn-group-solid mx-3">
+                                '.$status.'
+                            </div>
+                        </div>';
             })
-            ->rawColumns(['action','jumlah_menu','status_name'])
+            ->addColumn('driver', function($row) {
+                $driver = $row->driver_id ? 
+                    Driver::with('user')->find($row->driver_id)->user->name : 
+                    'belum mendapatkan driver';
+                return '<div class="text-center">
+                            <div class="btn-group btn-group-solid mx-3">
+                                <p>'.$driver.'</p>
+                            </div>
+                        </div>';
+            })
+            ->addColumn('pelanggan', function($row) {
+                $pelanggan = Pelanggan::with('user')->find($row->pelanggan_id)->user->name;
+                return '<div class="text-center">
+                            <div class="btn-group btn-group-solid mx-3">
+                                <p>'.$pelanggan.'</p>
+                            </div>
+                        </div>';
+            })
+            ->rawColumns(['action', 'pembayaran', 'status', 'driver', 'pelanggan'])
             ->make(true);
     }
     

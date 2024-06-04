@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class OrderDetail extends Model
 {
     use HasFactory;
-    protected $fillable = ['order_id','catatan','qty','menu_id'];
+    protected $fillable = ['order_id','catatan','qty','menu_id','price'];
 
     public function order()
     {
@@ -17,5 +17,9 @@ class OrderDetail extends Model
     public function menu()
     {
         return $this->belongsTo(Menu::class,'menu_id');
+    }
+    public function orderEkstra()
+    {
+        return $this->hasMany(OrderDetailEkstra::class,'order_detail_id','id');
     }
 }
