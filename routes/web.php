@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\OrderApiController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\MenuController;
@@ -51,5 +52,7 @@ Route::prefix('order')->name('order.')->group(function(){
 });
 
 });
+
+Route::get('/payment/{id}', [OrderApiController::class, 'show_midtrans']);
 
 require __DIR__ . '/auth.php';

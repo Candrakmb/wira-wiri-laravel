@@ -16,6 +16,20 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderApiController extends Controller
 {
+
+    public function show_midtrans($id){
+        $order = Order::find($id);
+        $snapToken = $order->snap_token;
+         if (is_null($snapToken)) {
+            $midtrans = new CreateSnapTokenService($order);
+            $snapToken = $midtrans->getSnapToken();
+
+            $order->snap_token = $snapToken;
+            $order->save();
+         }
+
+         return view('midtrans.show', compact('order', 'snapToken'));
+    }
     public function data_order($invoice){
         $order = Order::where('invoice_number',$invoice)->first();
        
@@ -73,7 +87,6 @@ class OrderApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            DB::rollback();
             return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => 'Validasi gagal. ' . $validator->errors()->first(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 400);
         }
 

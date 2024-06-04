@@ -22,8 +22,9 @@ class Order extends Model
 
     public static function generateInvoiceNumber()
     {
-        $latestInvoice = self::orderBy('created_at', 'desc')->first();
+        $latestInvoice = self::orderBy('invoice_number', 'desc')->first();
         $number = $latestInvoice ? intval(substr($latestInvoice->invoice_number, -5)) + 1 : 1;
+        // dd($number);
         return 'F-' . date('mY') . str_pad($number, 5, '0', STR_PAD_LEFT);
     }
 

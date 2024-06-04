@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\MenuApiController;
+use App\Http\Controllers\Api\MidtransApiController;
 use App\Http\Controllers\Api\OrderApiController;
 use App\Http\Controllers\Api\ProfilApiController;
 use App\Http\Controllers\Api\RegisterApiController;
@@ -53,10 +54,11 @@ Route::group(['middleware' => ['auth:api']], function() {
         Route::get('/{invoice}',[WpApiController::class,'weightProduct']);
     });
     Route::post('/logout' , [AuthApiController::class,'logout']);
+   
 });
 
 Route::post('/register', RegisterApiController::class);
 Route::post('/login' , [AuthApiController::class,'login']);
-
+Route::post('/payments', [MidtransApiController::class, 'test']);
 
 
