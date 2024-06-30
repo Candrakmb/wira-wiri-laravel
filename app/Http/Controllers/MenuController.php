@@ -137,22 +137,24 @@ class MenuController extends Controller
 
                             if(isset($data['menu_id'])){
 
-                                $katetgori = $request->only(
+                                $kategori = $request->only(
                                     [
                                         'nama_kategori',
                                         'opsi',
+                                        'max_pilih',
                                         'new_id_kategori',
                                         'menu_id',
                                     ]
                                 );
-                                foreach ($katetgori['nama_kategori'] as $pilihKategori => $value) {
-                                    if($katetgori['menu_id'][$pilihKategori] == $menu_id){
-                                        $katetgoriPilihan = new KategoriPilihMenu();
-                                        $katetgoriPilihan->menu_id=$menu->id;
-                                        $id_kategori=$katetgori['new_id_kategori'][$pilihKategori];
-                                        $katetgoriPilihan->nama=$katetgori['nama_kategori'][$pilihKategori];
-                                        $katetgoriPilihan->opsi=$katetgori['opsi'][$pilihKategori];
-                                        $katetgoriPilihan->save();
+                                foreach ($kategori['nama_kategori'] as $pilihKategori => $value) {
+                                    if($kategori['menu_id'][$pilihKategori] == $menu_id){
+                                        $kategoriPilihan = new KategoriPilihMenu();
+                                        $kategoriPilihan->menu_id=$menu->id;
+                                        $id_kategori=$kategori['new_id_kategori'][$pilihKategori];
+                                        $kategoriPilihan->nama=$kategori['nama_kategori'][$pilihKategori];
+                                        $kategoriPilihan->opsi=$kategori['opsi'][$pilihKategori];
+                                        $kategoriPilihan->max_pilih = $kategori['max_pilih'][$pilihKategori];
+                                        $kategoriPilihan->save();
 
                                         $dataPilihan = $request->only(
                                             [
@@ -166,7 +168,7 @@ class MenuController extends Controller
                                         foreach ($dataPilihan['nama_pilihan'] as $pilih => $value) {
                                             if($dataPilihan['mark_id_kategori'][$pilih] == $id_kategori){
                                                 $detail = new MenuDetail();
-                                                $detail->kategori_pilih_menu_id=$katetgoriPilihan->id;
+                                                $detail->kategori_pilih_menu_id=$kategoriPilihan->id;
                                                 $detail->nama_pilihan=$dataPilihan['nama_pilihan'][$pilih];
                                                 $detail->harga=$dataPilihan['harga_pilihan'][$pilih];
                                                 $detail->status=$dataPilihan['status_pilihan'][$pilih];
@@ -266,7 +268,7 @@ class MenuController extends Controller
                             $menu->save();
                     
                         if (isset($data['menu_id'])) {
-                            $kategori = $request->only(['nama_kategori', 'opsi', 'new_id_kategori', 'menu_id', 'kategori_id']);
+                            $kategori = $request->only(['nama_kategori', 'opsi', 'new_id_kategori', 'menu_id', 'kategori_id','max_pilih']);
 
                             // if (!empty($existingKategoriMenu)) {
                             //     KategoriPilihMenu::whereIn('id', $existingKategoriMenu)->delete();
@@ -283,6 +285,7 @@ class MenuController extends Controller
                                     $id_kategori=$kategori['new_id_kategori'][$pilihKategori];
                                     $kategoriPilihan->nama=$kategori['nama_kategori'][$pilihKategori];
                                     $kategoriPilihan->opsi=$kategori['opsi'][$pilihKategori];
+                                    $kategoriPilihan->max_pilih=$kategori['max_pilih'][$pilihKategori];
                                     $kategoriPilihan->save();
                     
                                     $dataPilihan = $request->only(['nama_pilihan', 'stok_pilihan', 'harga_pilihan', 'status_pilihan', 'mark_id_kategori', 'id_detail']);

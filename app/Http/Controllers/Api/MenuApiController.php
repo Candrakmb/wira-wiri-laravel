@@ -18,8 +18,6 @@ class MenuApiController extends Controller
 {
     public function get_kedai(Request $request){
 
-        $latitude = $request->latitude;
-        $longitude = $request->longitude;
         $search = $request->search;
         // dd($search);
         // Dapatkan kedai dengan status aktif
@@ -44,39 +42,36 @@ class MenuApiController extends Controller
                 'message' => 'Tidak ada kedai yang ditemukan',
             ], 404);
         }
-
-        // Hitung jarak dan tambahkan ke objek kedai
-        $kedaiWithDistance = $kedai->map(function ($k) use ($latitude, $longitude) {
-            $k->distance = Haversine::calculateDistance($latitude, $longitude, $k->latitude, $k->longitude);
-            return $k;
-        });
-
+      
         // Sortir kedai berdasarkan jarak terdekat
-        $kedaiWithDistance = $kedaiWithDistance->sortBy('distance')->values();
-
-        return response()->json([
-            'success'  => true,
-            'kedai'    => $kedaiWithDistance,
-        ], 200);
-    }
-
-    public function get_menu($id){
-        $kedai = Kedai::with(['user'])->where('id',  $id)->first();
-        $menu = Menu::with(['kategori_menu','kategori'])->where('kedai_id',  $id)->orderBy('menus.id','desc')->get();
-        if(!$menu){
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memuat data',
-            ], 500);
-        }
+        $kedai = $kedai->sortBy('distance')->values();
 
         return response()->json([
             'success'  => true,
             'kedai'    => $kedai,
-            'menu'     => $menu,
         ], 200);
-
     }
+
+    public function get_menu($id)
+        {
+            $kedai = Kedai::with(['user'])->where('id', $id)->first();
+            $menu = Menu::with(['customOptions', 'kategori','customOptions.menuDetail'])->where('kedai_id', $id)->orderBy('menus.id', 'desc')->get();
+
+            if (!$menu) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat memuat data',
+                ], 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'kedai' => $kedai,
+                'menu' => $menu,
+            ], 200);
+        }
+
+
     public function get_menu_detail($id){
         $pilihan = MenuDetail::where('kategori_pilih_menu_id ',  $id)->get();
 

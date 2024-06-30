@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::group(['middleware' => ['auth:api']], function() {
+Route::group(['middleware' => ['jwt.cookie','auth:api']], function () {
     Route::get('/user' , [ProfilApiController::class,'get_profil']);
     Route::prefix('profil')->name('menu.')->group(function(){
         Route::post('update' , [ProfilApiController::class,'update_profil']);
@@ -36,9 +36,10 @@ Route::group(['middleware' => ['auth:api']], function() {
         Route::post('/status/{status}',[ProfilApiController::class,'statusOnOff']);
         Route::get('status' , [ProfilApiController::class,'statusDriverKedai']);
     });
+    
     Route::prefix('menu')->name('menu.')->group(function(){
         Route::post('/kedai' , [MenuApiController::class,'get_kedai']);
-        Route::get('/get/{id}',[MenuApiController::class,'get_menu']);
+        Route::post('/get/{id}',[MenuApiController::class,'get_menu']);
         Route::get('/create',[MenuApiController::class,'create']);
         Route::get('/update/{id}',[MenuApiController::class,'update']);
         Route::post('/createform',[MenuApiController::class,'createform']);
@@ -53,12 +54,17 @@ Route::group(['middleware' => ['auth:api']], function() {
     Route::prefix('wp')->name('wp.')->group(function(){
         Route::get('/{invoice}',[WpApiController::class,'weightProduct']);
     });
-    Route::post('/logout' , [AuthApiController::class,'logout']);
-   
+    Route::post('logout', [AuthApiController::class, 'logout']);
+    Route::post('refresh', [AuthApiController::class, 'refresh']);
+    
 });
 
+Route::post('gettoken', [AuthApiController::class, 'getToken']);
 Route::post('/register', RegisterApiController::class);
-Route::post('/login' , [AuthApiController::class,'login']);
 Route::post('/payments', [MidtransApiController::class, 'test']);
+
+Route::post('login', [AuthApiController::class, 'login']);
+
+
 
 

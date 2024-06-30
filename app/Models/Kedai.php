@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\Haversine;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -9,6 +10,7 @@ use Illuminate\Support\Str;
 class Kedai extends Model
 {
     use HasFactory;
+
     /**
      * Indicates if the IDs are auto-incrementing.
      *
@@ -34,13 +36,14 @@ class Kedai extends Model
         'alamat',
         'latitude',
         'longitude',
-        'status',    
+        'status',
+        'img',
     ];
-    protected $appends = ['distance'];
-    
-   
+
+    protected $appends = ['distance', 'img_url'];
+
     /**
-     * Boot function from laravel.
+     * Boot function from Laravel.
      */
     public static function boot()
     {
@@ -49,24 +52,34 @@ class Kedai extends Model
             $model->id = (string) Str::uuid();
         });
     }
+
     public function user()
     {
-        return $this->belongsTo(User::class,'user_id');
-
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function menu()
     {
-        return $this->hasMany(Menu::class,'kedai_id','id');
+        return $this->hasMany(Menu::class, 'kedai_id', 'id');
     }
-    public function getDistanceAttribute()
-{
-    // Mengembalikan nilai default jika 'distance' tidak ada
-    return $this->attributes['distance'] ?? null;
-}
 
-    public function setDistanceAttribute($value)
+    public function getDistanceAttribute()
     {
-        $this->attributes['distance'] = $value;
+        $latitude = request()->input('latitude');
+        $longitude = request()->input('longitude');
+
+        if ($latitude && $longitude) {
+            return Haversine::calculateDistance($latitude, $longitude, $this->latitude, $this->longitude);
+        }
+
+        return null;
     }
+    // Accessor untuk URL gambar
+    public function getImgUrlAttribute()
+    {
+        return $this->img ? url('storage/image/kedai/' . $this->img) : null;
+    }
+
+
+
 }

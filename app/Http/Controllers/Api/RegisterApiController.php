@@ -19,7 +19,7 @@ class RegisterApiController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(Request $request)
-    {
+    {   
         // Set aturan validasi
         $validator = Validator::make($request->all(), [
             'name'        => 'required|string|max:255',

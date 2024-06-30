@@ -357,13 +357,18 @@
                                             <input type="text" id="nama_kategori" placeholder="contoh: rasa" name="nama_kategori[]" class="form-control input nama_kategori" required>
                                             <p class="help-block" style="display: none;"></p>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-3">
                                             <label for="opsi[]" class="label1">Opsi</label><span class="required">*</span>
                                             <select name="opsi[]" class="form-select select opsi">
                                                 <option value="" selected readonly>pilih Opsi</option>
                                                 <option value="1">Wajib</option>
                                                 <option value="0">Opsional</option>
                                             </select>
+                                            <p class="help-block" style="display: none;"></p>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="max_pilih[]" class="label1">Kategori</label><span class="required">*</span>
+                                            <input type="text" id="max_pilih" placeholder="bisa pilih berapa?" name="max_pilih[]" class="form-control input max_pilih" required>
                                             <p class="help-block" style="display: none;"></p>
                                         </div>
                                     </div>

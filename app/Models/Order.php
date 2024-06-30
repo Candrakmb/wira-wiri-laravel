@@ -56,6 +56,12 @@ class Order extends Model
             '2' => '<div class="badge rounded-pill bg-success">Selesai</div>',
             '3' => '<div class="badge rounded-pill bg-danger">Batal</div>'
         ];
-        return $status_order[$this->status_order];
+        
+        if (isset($status_order[$this->status_order])) {
+            return $status_order[$this->status_order];
+        } else {
+            return '<div class="badge rounded-pill bg-secondary">Unknown</div>'; // Atau status default lainnya
+        }
     }
+    
 }

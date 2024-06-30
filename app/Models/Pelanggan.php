@@ -34,6 +34,8 @@ class Pelanggan extends Model
         'no_whatsapp',
         'img_profil'
     ];
+    
+    protected $appends = ['img_url'];
 
    
     /**
@@ -50,5 +52,10 @@ class Pelanggan extends Model
     public function user()
     {
         return $this->belongsTo(User::class,'user_id');
+    }
+    
+    public function getImgUrlAttribute()
+    {
+        return $this->img_profil ? url('storage/image/pelanggan/' . $this->img_profil) : null;
     }
 }

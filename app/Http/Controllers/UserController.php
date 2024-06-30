@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Validator;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
@@ -131,6 +132,7 @@ class UserController extends Controller
                                         'tgl_lhr',
                                         'jenis_kelamin',
                                         'no_plat',
+                                        'profil'
                                     ]
                                 );
                                 $userDriver = new User();
@@ -142,6 +144,8 @@ class UserController extends Controller
                                 $userDriver->assignRole('driver');
 
                                 $driver = new Driver();
+                                $profil = time() . '.' . $data['profil'][$key]->extension();
+                                $data['profil'][$key]->storeAs('public/image/driver', $profil);
                                 $driver->user_id=$userDriver->id;
                                 $driver->id=(string) Str::uuid();
                                 $driver->no_whatsapp=$dataRole['no_wa'][$key];
@@ -150,6 +154,7 @@ class UserController extends Controller
                                 $driver->alamat = $dataRole['alamat'][$key];
                                 $driver->no_plat = $dataRole['no_plat'][$key];
                                 $driver->status= '0';
+                                $driver->img_profil = $profil;
                                 $driver->save();
 
                                 
@@ -162,6 +167,7 @@ class UserController extends Controller
                                         'alamat',
                                         'latitude',
                                         'longitud',
+                                        'profil'
                                     ]
                                 );
                                 $userKedai = new User();
@@ -173,6 +179,8 @@ class UserController extends Controller
                                 $userKedai->assignRole('kedai');
 
                                 $kedai = new Kedai();
+                                $profil = time() . '.' . $data['profil'][$key]->extension();
+                                $data['profil'][$key]->storeAs('public/image/kedai', $profil);
                                 $kedai->user_id=$userKedai->id;
                                 $kedai->id=(string) Str::uuid();
                                 $kedai->no_whatsapp=$dataRole['no_wa'][$key];
@@ -180,6 +188,7 @@ class UserController extends Controller
                                 $kedai->longitude = $dataRole['longitud'][$key];
                                 $kedai->alamat = $dataRole['alamat'][$key];
                                 $kedai->status= '0';
+                                $kedai->img = $profil;
                                 $kedai->save();
                                 
                             }
@@ -246,6 +255,19 @@ class UserController extends Controller
                     $pelanggan->save();
                 }else if ($role == 'driver'){
                     $driver = Driver::findOrFail($request->id);
+                    if ($request->hasFile('profil')) {
+                        // Menghapus gambar lama jika ada
+                        if ($driver->img_profil && Storage::exists('public/image/driver/' . $driver->img_profil)) {
+                            Storage::delete('public/image/driver/' . $driver->img_profil);
+                        }
+                
+                        // Memproses gambar baru
+                        $profil = time() . '.' . $request->file('profil')->extension();
+                        $request->file('profil')->storeAs('public/image/driver', $profil);
+                
+                        // Memperbarui data driver dengan gambar baru
+                        $driver->img_profil = $profil;
+                    }
                     $driver->no_whatsapp = $request->no_wa;
                     $driver->alamat = $request->alamat;
                     $driver->no_plat = $request->no_plat;
@@ -254,6 +276,19 @@ class UserController extends Controller
                     $driver->save();
                 }else if ($role == 'kedai') {
                     $kedai = Kedai::findOrFail($request->id);
+                    if ($request->hasFile('profil')) {
+                        // Menghapus gambar lama jika ada
+                        if ($kedai->img && Storage::exists('public/image/kedai/' . $kedai->img)) {
+                            Storage::delete('public/image/kedai/' . $kedai->img);
+                        }
+                
+                        // Memproses gambar baru
+                        $profil = time() . '.' . $request->file('profil')->extension();
+                        $request->file('profil')->storeAs('public/image/kedai', $profil);
+                
+                        // Memperbarui data Kedai dengan gambar baru
+                        $kedai->img = $profil;
+                    }
                     $kedai->no_whatsapp = $request->no_wa;
                     $kedai->alamat = $request->alamat;
                     $kedai->latitude = $request->latitude;

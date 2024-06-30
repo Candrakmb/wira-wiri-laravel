@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class KategoriPilihMenu extends Model
 {
     use HasFactory;
-    protected $fillable = ['menu_id','nama','opsi '];
+    protected $fillable = ['menu_id','nama','opsi','max_pilih'];
 
     public function Menu()
     {

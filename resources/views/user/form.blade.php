@@ -56,7 +56,7 @@
                 </div>
                 <div class="col-md-6 mt-2">
                 <label for="no_wa[]" class="label1">No Whatsapp</label><span class="required">*</span>
-                <input type="number" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa[]" class="form-control input" required>
+                <input type="text" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa[]" class="form-control input" required>
                 <p class="help-block" style="display: none;"></p>
                 </div>
             </div>
@@ -76,6 +76,30 @@
           </div>
           <div class="card-body px-4 pb-3">
             <div class="row ">
+              @if ($driver != null)
+                <div class="col-md-12 mt-5">
+                    <div class="d-flex justify-content-center" data-id="{{ $driver->id }}">
+                        <div class="container_file">
+                            <div class="header_file img{{ $driver->id }}">
+                              <img src="{{asset('storage/image/driver/'.$driver->img_profil)}}" alt="{{$driver->nama}}">
+                            </div>
+                            <input type="file" class="form-control fileImg" name="profil">
+                        </div>
+                    </div>
+                </div>
+              @endif
+              @if ($kedai != null)
+              <div class="col-md-12 mt-5">
+                  <div class="d-flex justify-content-center" data-id="{{ $kedai->id }}">
+                      <div class="container_file">
+                          <div class="header_file img{{ $kedai->id }}">
+                            <img src="{{asset('storage/image/kedai/'.$kedai->img)}}" alt="{{$kedai->nama}}">
+                          </div>
+                          <input type="file" class="form-control fileImg" name="profil">
+                      </div>
+                  </div>
+              </div>
+            @endif
               <div class="col-md-6 mt-2">
                 <label for="name" class="label1">Nama</label><span class="required">*</span>
                 <input type="text" placeholder="Silahkan Masukkan" name="name"
@@ -108,14 +132,14 @@
               @if ($pelanggan != null)
               <div class="col-md-6 mt-2">
                 <label for="no_wa" class="label1">No Whatsapp</label><span class="required">*</span>
-                <input type="number" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa" class="form-control input" value="{{$pelanggan->no_whatsapp}}" required>
+                <input type="text" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa" class="form-control input" value="{{$pelanggan->no_whatsapp}}" required>
                 <p class="help-block" style="display: none;"></p>
               </div>
               @endif
               @if ($driver != null)
               <div class="col-md-6 mt-2">
                 <label for="no_wa" class="label1">No Whatsapp</label><span class="required">*</span>
-                <input type="number" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa" class="form-control input" value="{{$driver->no_whatsapp}}" required>
+                <input type="text" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa" class="form-control input" value="{{$driver->no_whatsapp}}" required>
                 <p class="help-block" style="display: none;"></p>
               </div>
               <div class="col-md-6 mt-2">
@@ -145,7 +169,7 @@
               @if ($kedai != null)
               <div class="col-md-6 mt-2">
                 <label for="no_wa" class="label1">No Whatsapp</label><span class="required">*</span>
-                <input type="number" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa" class="form-control input" value="{{$kedai->no_whatsapp}}" required>
+                <input type="test" id="no_wa" placeholder="Silahkan Masukkan" name="no_wa" class="form-control input" value="{{$kedai->no_whatsapp}}" required>
                 <p class="help-block" style="display: none;"></p>
               </div>
               <div class="col-md-6 mt-2">
@@ -182,7 +206,7 @@
           </form>
               @if($type == 'create')
               <div class="col"> 
-                <button class="button-primary" id="add_row"> 
+                <button type="button" class="button-primary" id="add_row"> 
                 + ADD
               </button>
               @endif

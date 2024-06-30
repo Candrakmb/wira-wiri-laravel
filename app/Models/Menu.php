@@ -9,6 +9,7 @@ class Menu extends Model
 {
     use HasFactory;
     protected $fillable = ['kedai_id','nama','gambar','deskripsi','status','harga','kategori_id'];
+    protected $appends = ['img_url', 'has_custom', 'harga_formatted'];
 
     public function Kategori()
     {
@@ -18,9 +19,21 @@ class Menu extends Model
     {
         return $this->belongsTo(Kedai::class,'kedai_id');
     }
-    public function kategori_menu()
+    public function customOptions()
     {
         return $this->hasMany(KategoriPilihMenu::class,'menu_id','id');
     }
+    public function getHasCustomAttribute()
+    {
+        return $this->customOptions()->exists();
+    }
 
+    public function getHargaFormattedAttribute()
+    {
+        return 'Rp' . number_format($this->harga, 0, ',', '.');
+    }
+    public function getImgUrlAttribute()
+    {
+        return $this->gambar ? url('storage/image/menu/' . $this->gambar) : null;
+    }
 }
