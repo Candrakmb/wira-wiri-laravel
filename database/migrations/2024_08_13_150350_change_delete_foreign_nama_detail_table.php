@@ -30,7 +30,6 @@ return new class extends Migration
                   ->references('id')
                   ->on('kedais') // Corrected table name
                   ->onDelete('cascade');
-            $table->timestamps();
         });
     }
 
