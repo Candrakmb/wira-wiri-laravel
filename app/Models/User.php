@@ -70,6 +70,7 @@ class User extends Authenticatable implements JWTSubject
         });
     }
 
+
     public function driver()
     {
         return $this->hasMany(Driver::class,'user_id','id');

@@ -100,8 +100,7 @@ return [
     | Notice: If you set this to null you should remove 'exp' element from 'required_claims' list.
     |
     */
-
-    'ttl' => env('JWT_TTL', 525600),
+    'ttl' => env('JWT_TTL', 43200),
 
     /*
     |--------------------------------------------------------------------------
@@ -120,7 +119,7 @@ return [
     |
     */
 
-    'refresh_ttl' => env('JWT_REFRESH_TTL', 1051200),
+    'refresh_ttl' => env('JWT_REFRESH_TTL', 360),
 
     /*
     |--------------------------------------------------------------------------

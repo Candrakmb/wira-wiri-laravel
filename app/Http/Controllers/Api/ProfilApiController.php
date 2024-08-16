@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Haversine;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\AlamatPelanggan;
@@ -38,17 +39,17 @@ class ProfilApiController extends Controller
     public function statusOnOff(Request $request, $status){
         $user = auth()->guard('api')->user();
         $statusValue = $status == 'on' ? '1' : '0';
-        
+
         if ($user->getRoleNames()->contains('kedai')) {
             $kedai = Kedai::where('user_id', $user->id)->update([
                 'status' => $statusValue,
             ]);
-        
+
             return response()->json([
                 'success' => true,
                 'status' => $kedai,
             ], 200);
-        
+
         } elseif ($user->getRoleNames()->contains('driver')) {
             $driver = Driver::where('user_id', $user->id)->update([
                 'status' => $statusValue,
@@ -56,19 +57,19 @@ class ProfilApiController extends Controller
                 'latitude' => $status == 'on' ? $request->latitude : null,
                 'longitude' => $status == 'on' ? $request->longitude : null,
             ]);
-        
+
             return response()->json([
                 'success' => true,
                 'status' => $driver,
             ], 200);
-        
+
         } else {
             return response()->json([
                 'success' => false,
                 'message' => 'User not found',
             ], 404);
         }
-        
+
     }
 
     public function get_profil(){
@@ -76,7 +77,7 @@ class ProfilApiController extends Controller
         if ($userDetail) {
             // Load only the non-empty relationships
             $userDetail->load(['pelanggan', 'driver', 'kedai']);
-    
+
             // Filter out empty relationships
             $filteredUser = $userDetail->toArray();
             $filteredUser = array_filter($filteredUser, function($value, $key) {
@@ -105,7 +106,7 @@ class ProfilApiController extends Controller
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'no_whatsapp' => ['required', 'string', 'regex:/^\+62\d{8,12}$/'],
         ];
-        
+
         if ($user->getRoleNames()->contains('driver')) {
             $rules = array_merge($rules, [
                 'tanggal_lahir' => 'required|date',
@@ -120,9 +121,9 @@ class ProfilApiController extends Controller
                 'longitude' => 'required',
             ]);
         }
-        
+
         $validator = Validator::make($request->all(), $rules);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'title' => 'Error',
@@ -132,15 +133,15 @@ class ProfilApiController extends Controller
                 'type' => 'error'
             ], 400);
         }
-        
+
         DB::beginTransaction();
-        
+
         try {
             User::where('id', $user->id)->update([
                 'name' => $request->name,
                 'email' => $request->email,
             ]);
-        
+
             if ($user->getRoleNames()->contains('user')) {
                 Pelanggan::where('user_id', $user->id)->update([
                     'no_whatsapp' => $request->no_whatsapp,
@@ -161,7 +162,7 @@ class ProfilApiController extends Controller
                     'longitude' => $request->longitude,
                 ]);
             }
-        
+
             DB::commit();
             return response()->json([
                 'title' => 'Success!',
@@ -198,8 +199,44 @@ class ProfilApiController extends Controller
                 'message' => 'alamat not found',
             ], 404);
         }
-        
+
     }
+    public function selectedAlamat(Request $request){
+        $user = auth()->guard('api')->user();
+        $pelanggan = Pelanggan::where('user_id', $user->id)->first();
+        if($pelanggan){
+            $alamat = AlamatPelanggan::with(['pelanggan'])->where('pelanggan_id',$pelanggan->id)->get();
+            if($alamat != null){
+                $userLatitude = $request->input('latitude');
+                $userLongitude = $request->input('longitude');
+
+                $closestAlamatId = null;
+                $minDistance = PHP_INT_MAX;
+
+                foreach ($alamat as $item) {
+                    $distance = Haversine::calculateDistance($userLatitude, $userLongitude, $item->latitude, $item->longitude);
+                    if ($distance < $minDistance) {
+                        $minDistance = $distance;
+                        $closestAlamatId = $item->id;
+                    }
+                }
+            }else{
+                $closestAlamatId = null;
+            }
+
+            return response()->json([
+                'success' => true,
+                'alamat' => $closestAlamatId,
+            ], 200);
+        }else{
+            return response()->json([
+                'success' => false,
+                'message' => 'alamat not found',
+            ], 404);
+        }
+
+    }
+
     public function createAlamat(Request $request){
         $user = auth()->guard('api')->user();
 
@@ -208,13 +245,13 @@ class ProfilApiController extends Controller
             'tipe_alamat' => 'required|string|max:255',
             'detail_alamat' => 'required|string|max:255',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
-                'title' => 'Error', 
-                'icon' => 'error', 
-                'text' => 'Validasi gagal. ' . $validator->errors()->first(), 
-                'ButtonColor' => '#EF5350', 
+                'title' => 'Error',
+                'icon' => 'error',
+                'text' => 'Validasi gagal. ' . $validator->errors()->first(),
+                'ButtonColor' => '#EF5350',
                 'type' => 'error'
             ], 400);
         }
@@ -231,7 +268,7 @@ class ProfilApiController extends Controller
                 'longitude' => $request->longitude,
             ]);
 
-        
+
             DB::commit();
             return response()->json([
                 'title' => 'Success!',
@@ -250,7 +287,7 @@ class ProfilApiController extends Controller
                 'type' => 'error'
             ], 500);
         }
-        
+
     }
     public function getAlamatUpdate($id){
 
@@ -273,13 +310,13 @@ class ProfilApiController extends Controller
             'tipe_alamat' => 'required|string|max:255',
             'detail_alamat' => 'required|string|max:255',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
-                'title' => 'Error', 
-                'icon' => 'error', 
-                'text' => 'Validasi gagal. ' . $validator->errors()->first(), 
-                'ButtonColor' => '#EF5350', 
+                'title' => 'Error',
+                'icon' => 'error',
+                'text' => 'Validasi gagal. ' . $validator->errors()->first(),
+                'ButtonColor' => '#EF5350',
                 'type' => 'error'
             ], 400);
         }
@@ -316,7 +353,6 @@ class ProfilApiController extends Controller
     }
     public function deleteAlamat($id){
         DB::beginTransaction();
-
         try {
             $alamat = AlamatPelanggan::where('id', $id)->first();
 

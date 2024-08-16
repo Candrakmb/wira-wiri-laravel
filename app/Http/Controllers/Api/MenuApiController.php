@@ -42,7 +42,7 @@ class MenuApiController extends Controller
                 'message' => 'Tidak ada kedai yang ditemukan',
             ], 404);
         }
-      
+
         // Sortir kedai berdasarkan jarak terdekat
         $kedai = $kedai->sortBy('distance')->values();
 
@@ -97,7 +97,7 @@ class MenuApiController extends Controller
     }
 
     public function update($id){
-        $menu = Menu::with(['kategori'])->where('id',$id)->first();
+        $menu = Menu::with(['customOptions', 'kategori','customOptions.menuDetail'])->where('id',$id)->first();
         $kategori_menu = KategoriPilihMenu::with('menuDetail')->where('menu_id',$id)->get();
         return response()->json([
             'success'  => true,
@@ -144,7 +144,7 @@ class MenuApiController extends Controller
             foreach ($data['nama'] as $key => $value) {
                 $gambar_menu = time() . '.' . $data['gambar'][$key]->extension();
                 $data['gambar'][$key]->storeAs('public/image/menu', $gambar_menu);
-                $menu = new Menu(); 
+                $menu = new Menu();
                 $menu->kedai_id = $kedai_id;
                 $menu->nama = $data['nama'][$key];
                 $menu->kategori_id = $data['kategori'][$key];
@@ -189,7 +189,7 @@ class MenuApiController extends Controller
     }
 
     public function updateform(Request $request){
-        
+
         $validator = Validator::make($request->all(), [
             'kedai_id' => 'required',
             'menu_id' => 'required|integer',
@@ -209,13 +209,13 @@ class MenuApiController extends Controller
             'status_pilihan.*' => 'required|integer',
             'mark_id_kategori.*' => 'nullable|integer',
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
-                'title' => 'Error', 
-                'icon' => 'error', 
-                'text' => 'Validasi gagal. ' . $validator->errors()->first(), 
-                'ButtonColor' => '#EF5350', 
+                'title' => 'Error',
+                'icon' => 'error',
+                'text' => 'Validasi gagal. ' . $validator->errors()->first(),
+                'ButtonColor' => '#EF5350',
                 'type' => 'error'
             ], 400);
         }
@@ -232,53 +232,53 @@ class MenuApiController extends Controller
             $menu->deskripsi = $request->deskripsi;
             $menu->harga = $request->harga;
             $menu->status = $request->status;
-        
+
             if ($request->hasFile('gambar')) {
                 if ($menu->gambar) {
                     Storage::delete('public/image/menu/' . $menu->gambar);
                 }
-        
+
                 $gambar_menu = time() . '.' . $request->gambar->extension();
                 $request->gambar->storeAs('public/image/menu', $gambar_menu);
                 $menu->gambar = $gambar_menu;
             }
-        
+
             $menu->save();
-        
+
 
                 $existingKategoriMenuDetail = KategoriPilihMenu::where('menu_id', $request->menu_id)->get();
-               
+
                 if (!empty($existingKategoriMenuDetail)) {
                     $existingKategoriMenu =$existingKategoriMenuDetail->pluck('id')->toArray();
                     $existingMenuDetail = MenuDetail::whereIn('kategori_pilih_menu_id', $existingKategoriMenu)->pluck('id')->toArray();
                     KategoriPilihMenu::where('menu_id', $request->menu_id)->delete();
                 }
-               
+
                 $kategoriData = $request->only(['nama_kategori', 'opsi', 'kategori_detail_id']);
-                
+
                 if (!empty($kategoriData['kategori_detail_id'])) {
 
                 foreach ($kategoriData['nama_kategori'] as $index => $value) {
                     $kategoriPilihan = new KategoriPilihMenu();
-        
+
                     if (isset($kategoriData['kategori_detail_id'][$index]) && in_array($kategoriData['kategori_detail_id'][$index], $existingKategoriMenu)) {
                         $kategoriPilihan->id = $kategoriData['kategori_detail_id'][$index];
                     }
-        
+
                     $kategoriPilihan->menu_id = $request->menu_id;
                     $kategoriPilihan->nama = $kategoriData['nama_kategori'][$index];
                     $kategoriPilihan->opsi = $kategoriData['opsi'][$index];
                     $kategoriPilihan->save();
-        
+
                     $dataPilihan = $request->only(['nama_pilihan', 'stok_pilihan', 'harga_pilihan', 'status_pilihan', 'mark_id_kategori','id_detail']);
-        
+
                     foreach ($dataPilihan['nama_pilihan'] as $pilihIndex => $value) {
                         if ($dataPilihan['mark_id_kategori'][$pilihIndex] == $kategoriData['kategori_detail_id'][$index]) {
                             $detail = new MenuDetail();
                             if (isset($dataPilihan['id_detail'][$pilihIndex]) && in_array($dataPilihan['id_detail'][$pilihIndex], $existingMenuDetail)) {
                                 $detail->id = $dataPilihan['id_detail'][$pilihIndex];
                             }
-        
+
                             $detail->kategori_pilih_menu_id = $kategoriPilihan->id;
                             $detail->nama_pilihan = $dataPilihan['nama_pilihan'][$pilihIndex];
                             $detail->harga = $dataPilihan['harga_pilihan'][$pilihIndex];
@@ -289,9 +289,9 @@ class MenuApiController extends Controller
                     }
                 }
             }
-        
+
             DB::commit();
-        
+
             return response()->json([
                 'title' => 'Success!',
                 'icon' => 'success',
@@ -300,7 +300,7 @@ class MenuApiController extends Controller
                 'type' => 'success',
                 'data' => $request->all()
             ], 200);
-        
+
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
@@ -311,7 +311,7 @@ class MenuApiController extends Controller
                 'type' => 'error'
             ], 500);
         }
-        
+
 
     }
     public function deleteform($id){

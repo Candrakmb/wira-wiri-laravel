@@ -24,19 +24,20 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
-Route::group(['middleware' => ['jwt.cookie','auth:api']], function () {
+Route::group(['middleware' => ['auth:api','refresh.token']], function () {
     Route::get('/user' , [ProfilApiController::class,'get_profil']);
     Route::prefix('profil')->name('menu.')->group(function(){
         Route::post('update' , [ProfilApiController::class,'update_profil']);
         Route::get('alamat' , [ProfilApiController::class,'getAlamat']);
         Route::get('detail/alamat/{id}' , [ProfilApiController::class,'getAlamatUpdate']);
+        Route::post('selected/alamat' , [ProfilApiController::class,'selectedAlamat']);
         Route::post('create/alamat' , [ProfilApiController::class,'createAlamat']);
         Route::post('update/alamat' , [ProfilApiController::class,'updateAlamat']);
         Route::delete('delete/alamat/{id}' , [ProfilApiController::class,'deleteAlamat']);
         Route::post('/status/{status}',[ProfilApiController::class,'statusOnOff']);
         Route::get('status' , [ProfilApiController::class,'statusDriverKedai']);
     });
-    
+
     Route::prefix('menu')->name('menu.')->group(function(){
         Route::post('/kedai' , [MenuApiController::class,'get_kedai']);
         Route::post('/get/{id}',[MenuApiController::class,'get_menu']);
@@ -55,14 +56,12 @@ Route::group(['middleware' => ['jwt.cookie','auth:api']], function () {
         Route::get('/{invoice}',[WpApiController::class,'weightProduct']);
     });
     Route::post('logout', [AuthApiController::class, 'logout']);
-    Route::post('refresh', [AuthApiController::class, 'refresh']);
-    
+
 });
 
-Route::post('gettoken', [AuthApiController::class, 'getToken']);
 Route::post('/register', RegisterApiController::class);
 Route::post('/payments', [MidtransApiController::class, 'test']);
-
+Route::post('refresh', [AuthApiController::class, 'refresh']);
 Route::post('login', [AuthApiController::class, 'login']);
 
 
