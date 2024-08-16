@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_detail_ekstras', function (Blueprint $table) {
-            $table->dropColumn('nama_ekstra');
-        });
+        // Schema::table('order_detail_ekstras', function (Blueprint $table) {
+        //     $table->dropColumn('nama_ekstra');
+        // });
 
         Schema::table('order_destinations', function (Blueprint $table) {
             $table->dropColumn('alamat_detail');
