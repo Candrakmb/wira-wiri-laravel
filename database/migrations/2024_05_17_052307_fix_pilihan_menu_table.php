@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::table('menu_details', function (Blueprint $table) {
             // Menghapus constraint foreign key terlebih dahulu, jika ada
             $table->dropForeign(['menu_id']);
-            // Kemudian menghapus indeks jika ada
-            $table->dropIndex(['menu_id']);
             // Akhirnya, menghapus kolom
             $table->dropColumn('menu_id');
         });
