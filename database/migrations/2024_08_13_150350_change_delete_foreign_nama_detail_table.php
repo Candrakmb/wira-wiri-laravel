@@ -15,8 +15,10 @@ return new class extends Migration
         //     $table->dropColumn('nama_ekstra');
         // });
 
-        Schema::table('order_destinations', function (Blueprint $table) {
-            $table->dropColumn('nama');
+        Schema::create('order_destinations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->integer('tipe_destination')->comment('0 = tujuan','1 = restaurant');
             $table->uuid('kedai_id')->nullable();
             $table->unsignedBigInteger('alamat_pelanggan_id')->nullable();
             $table->foreign('alamat_pelanggan_id')
@@ -26,8 +28,9 @@ return new class extends Migration
             $table->foreign('kedai_id')
                   ->nullable()
                   ->references('id')
-                  ->on('kedais') // Corrected table name
+                  ->on('kedais')
                   ->onDelete('cascade');
+            $table->timestamps();
         });
     }
 

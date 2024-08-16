@@ -14,9 +14,6 @@ return new class extends Migration
         Schema::table('order_detail_ekstras', function (Blueprint $table) {
             $table->dropColumn('price');
         });
-        Schema::table('order_destinations', function (Blueprint $table) {
-            $table->string('nama');
-        });
     }
 
     /**
