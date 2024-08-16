@@ -16,9 +16,7 @@ return new class extends Migration
         // });
 
         Schema::table('order_destinations', function (Blueprint $table) {
-            $table->dropColumn('alamat_detail');
-            $table->dropColumn('latitude');
-            $table->dropColumn('longitude');
+            $table->dropColumn('nama');
             $table->uuid('kedai_id')->nullable();
             $table->unsignedBigInteger('alamat_pelanggan_id')->nullable();
             $table->foreign('alamat_pelanggan_id')
