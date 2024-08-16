@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('menu_details', function (Blueprint $table) {
-            // Menghapus constraint foreign key terlebih dahulu, jika ada
-            $table->dropForeign(['menu_id']);
-            // Akhirnya, menghapus kolom
-            $table->dropColumn('menu_id');
-        });
+        // Schema::table('menu_details', function (Blueprint $table) {
+        //     // Menghapus constraint foreign key terlebih dahulu, jika ada
+        //     $table->dropForeign(['menu_id']);
+        //     // Akhirnya, menghapus kolom
+        //     $table->dropColumn('menu_id');
+        // });
 
         // Memodifikasi tabel 'kategori_pilih_menus'
         Schema::table('kategori_pilih_menus', function (Blueprint $table) {
@@ -37,14 +37,14 @@ return new class extends Migration
             $table->dropColumn('menu_id');
         });
 
-        // Membatalkan perubahan di tabel 'menu_details'
-        Schema::table('menu_details', function (Blueprint $table) {
-            // Menambahkan kembali kolom 'menu_id'
-            $table->unsignedBigInteger('menu_id');
-            // Menambahkan kembali constraint foreign key
-            $table->foreign('menu_id')->references('id')->on('menus');
-            // Opsional, tambahkan kembali indeks jika diperlukan
-            $table->index('menu_id');
-        });
+        // // Membatalkan perubahan di tabel 'menu_details'
+        // Schema::table('menu_details', function (Blueprint $table) {
+        //     // Menambahkan kembali kolom 'menu_id'
+        //     $table->unsignedBigInteger('menu_id');
+        //     // Menambahkan kembali constraint foreign key
+        //     $table->foreign('menu_id')->references('id')->on('menus');
+        //     // Opsional, tambahkan kembali indeks jika diperlukan
+        //     $table->index('menu_id');
+        // });
     }
 };
