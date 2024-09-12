@@ -36,13 +36,21 @@ class ProfilApiController extends Controller
             'status' => $status->status,
         ], 200);
     }
-    public function statusOnOff(Request $request, $status){
+    public function statusOnOff(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'status' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false,'title' => 'Error', 'icon' => 'error', 'text' => 'Validasi gagal. ' . $validator->errors()->first(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 400);
+        }
+
         $user = auth()->guard('api')->user();
-        $statusValue = $status == 'on' ? '1' : '0';
 
         if ($user->getRoleNames()->contains('kedai')) {
             $kedai = Kedai::where('user_id', $user->id)->update([
-                'status' => $statusValue,
+                'status' => $request->status,
             ]);
 
             return response()->json([
@@ -52,10 +60,10 @@ class ProfilApiController extends Controller
 
         } elseif ($user->getRoleNames()->contains('driver')) {
             $driver = Driver::where('user_id', $user->id)->update([
-                'status' => $statusValue,
-                'time_on' => $status == 'on' ? Carbon::now() : null,
-                'latitude' => $status == 'on' ? $request->latitude : null,
-                'longitude' => $status == 'on' ? $request->longitude : null,
+                'status' => $request->status,
+                'time_on' => $request->status == 1 ? Carbon::now() : null,
+                'latitude' => $request->status == 1 ? $request->latitude : null,
+                'longitude' => $request->status == 1 ? $request->longitude : null,
             ]);
 
             return response()->json([

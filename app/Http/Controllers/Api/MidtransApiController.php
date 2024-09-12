@@ -9,18 +9,26 @@ use Carbon\Carbon;
 
 class MidtransApiController extends Controller
 {
-    public function test(Request $request)
+    public function callback(Request $request)
     {
         // dd($request->all());
         try {
             $serverKey = config('midtrans.server_key');
             $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
-            dd($hashed == $request->signature_key);
             if ($hashed == $request->signature_key) {
                 $order = Order::where('invoice_number', $request->order_id)->first();
-                
+
                 if ($order) {
-                    if ($request->transaction_status == 'settlement') {
+                    if ($request->transaction_status == 'capture') {
+                        if ($request->payment_type == 'credit_card') {
+                            if ($request->fraud_status == 'challenge') {
+                                $order->update(['status_pembayaran' => '0']);
+                            } else {
+                                $order->update(['status_pembayaran' => '1', 'paid_at' => Carbon::now(), 'status_order' => '0']);
+                            }
+                        }
+                    }
+                    else if ($request->transaction_status == 'settlement') {
                         $order->update(['status_pembayaran' => '1', 'paid_at' => Carbon::now(), 'status_order' => '0']);
                     } else if ($request->transaction_status == 'pending') {
                         $order->update(['status_pembayaran' => '0']);
@@ -31,7 +39,7 @@ class MidtransApiController extends Controller
                     } else if ($request->transaction_status == 'cancel') {
                         $order->update(['status_pembayaran' => '4']);
                     }
-                    
+
                     return response()
                         ->json([
                             'success' => true,
@@ -57,6 +65,6 @@ class MidtransApiController extends Controller
                     'success' => false,
                     'message' => 'An error occurred: ' . $e->getMessage(),
                 ], 500);
-        }        
-    } 
+        }
+    }
 }

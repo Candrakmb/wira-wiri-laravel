@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PosisiDriver;
+use App\Events\StatusOrder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
@@ -13,6 +15,7 @@ use App\Models\OrderDetail;
 use App\Models\OrderDetailEkstra;
 use App\Models\Pelanggan;
 use App\Services\Midtrans\CreateSnapTokenService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -52,11 +55,40 @@ class OrderApiController extends Controller
                 }])
                 ->where('id', $order->pelanggan_id)
                 ->first();
-            $orderDetail = OrderDetail::with(['orderEkstra','menu'])->where('order_id',$order->id)->get();
+            // $orderDetail = OrderDetail::with(['orderEkstra','orderEkstra.menuDetail','orderEkstra.menuDetail.kategoriPilihan','menu'])->where('order_id',$order->id)->get();
+            $orderDetails = OrderDetail::with(['menu'])->where('order_id', $order->id)->get();
+
+            $dataOrder = [];
+            foreach ($orderDetails as $detail) {
+                $dataOrderEkstra = [];
+
+                $orderEkstra = OrderDetailEkstra::with(['menuDetail','menuDetail.kategoriPilihan'])
+                    ->where('order_detail_id', $detail->id)
+                    ->get();
+                if($orderEkstra){
+                    foreach ($orderEkstra as $ekstra) {
+                        $dataOrderEkstra[] = [
+                            'nama_kategori' => $ekstra->menuDetail->kategoriPilihan->nama,
+                            'nama_pilihan' => $ekstra->menuDetail->nama_pilihan,
+                            'price_ekstra' => $ekstra->menuDetail->harga,
+                        ];
+                    }
+                }
+
+                $dataOrder[] = [
+                    'catatan' => $detail->catatan,
+                    'kedai_id'=> $detail->menu->kedai_id,
+                    'price' => $detail->price,
+                    'qty' => $detail->qty,
+                    'menu' => $detail->menu->nama,
+                    'ekstra' => $dataOrderEkstra,
+                ];
+            }
+
             $orderDestination = OrderDestination::where('order_id',$order->id)->get();
             if ($orderDestination) {
                 // Load only the non-empty relationships
-                $orderDestination->load(['alamatPelanggan', 'kedai']);
+                $orderDestination->load(['alamatPelanggan', 'kedai','kedai.user']);
 
                 // Filter out empty relationships
                 $filteredDestinasi = $orderDestination->toArray();
@@ -69,7 +101,7 @@ class OrderApiController extends Controller
                 'order' => $order,
                 'pelanggan' => $pelanggan,
                 'driver' => $driver,
-                'order_detail'=> $orderDetail,
+                'order_detail'=> $dataOrder,
                 'order_destination'=> $filteredDestinasi,
             ], 200);
         } else {
@@ -230,6 +262,145 @@ class OrderApiController extends Controller
                 'text' => $e->getMessage(),
                 'ButtonColor' => '#EF5350',
                 'type' => 'error'
+            ], 500);
+        }
+    }
+
+    public function updateStatusOrder(Request $request){
+        $validator = Validator::make($request->all(), [
+            'invoice_number' => 'required',
+            'status_order' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false,'title' => 'Error', 'icon' => 'error', 'text' => 'Validasi gagal. ' . $validator->errors()->first(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 400);
+        }
+        DB::beginTransaction();
+        try {
+            $order = Order::where('invoice_number',$request->invoice_number)->first();
+            if($order){
+                $order->status_order = $request->status_order;
+                $order->save();
+            }
+
+            if($request->status_order == 6){
+                $driver = Driver::where('id', $order->driver_id)->first();
+                $driver->status = 1;
+                $driver->time_on = Carbon::now();
+                $driver->save();
+            } else {
+                $driver = null;
+            }
+
+            broadcast(new StatusOrder($order))->toOthers();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'data_order' => $order,
+                'driver' => $driver
+            ], 200);
+        } catch ( \Exception $e){
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'text' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function addDriverOrder(Request $request){
+        $validator = Validator::make($request->all(), [
+            'invoice_number' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false,'title' => 'Error', 'icon' => 'error', 'text' => 'Validasi gagal. ' . $validator->errors()->first(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 400);
+        }
+        $order = Order::where('invoice_number',$request->invoice_number)->first();
+        if($order){
+            $userAuth = $userAuth = auth()->guard('api')->user();
+
+            if($userAuth->getRoleNames()->contains('driver')){
+                $driver = Driver::where('user_id',$userAuth->id)->first();
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => "tidak memiliki akses"
+                ], 401);
+            }
+            DB::beginTransaction();
+            try {
+                $order->status_order = 1;
+                $order->driver_id = $driver->id;
+                $order->save();
+
+                $driver->status = 2;
+                $driver->save();
+
+                $order->load(['driver','driver.user']);
+                // dd($order);
+                broadcast(new StatusOrder($order))->toOthers();
+                DB::commit();
+                return response()->json([
+                    'success' => true,
+                    'data_order' => $order,
+                    'driver' => $driver
+                ], 200);
+            } catch(\Exception $e) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'text' => $e->getMessage(),
+                ], 500);
+            }
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'data order tidak ditemukan'
+            ], 404);
+        }
+    }
+
+    public function positionDriver(Request $request){
+        $validator = Validator::make($request->all(), [
+            'latitude' => 'required',
+            'longitude' => 'required',
+            'invoice_number' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false,'title' => 'Error', 'icon' => 'error', 'text' => 'Validasi gagal. ' . $validator->errors()->first(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 200);
+        }
+        DB::beginTransaction();
+        $order = Order::where('invoice_number',$request->invoice_number)->first();
+        $userAuth = $userAuth = auth()->guard('api')->user();
+        if($userAuth->getRoleNames()->contains('driver')){
+            $driver = Driver::where('user_id',$userAuth->id)->first();
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => "tidak memiliki akses"
+            ], 401);
+        }
+
+        try {
+            $driver->latitude = $request->latitude;
+            $driver->longitude = $request->longitude;
+            $driver->save();
+            $driver->load(['user']);
+            if($order->status_order == 6){
+                broadcast(new PosisiDriver($driver))->toOthers();
+            }
+            DB::commit();
+            return response()->json([
+                    'success' => true,
+                    'driver' => $driver
+            ], 200);
+        } catch (\Exception $e){
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'text' => $e->getMessage(),
             ], 500);
         }
     }

@@ -61,6 +61,7 @@ class AuthApiController extends Controller
                 [
                     'success' => true,
                     'user' => $user,
+                    'role' => $user->getRoleNames(),
                     'token' => $token,
                 ],
                 200,

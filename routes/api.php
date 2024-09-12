@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\ChatApiController;
 use App\Http\Controllers\Api\MenuApiController;
 use App\Http\Controllers\Api\MidtransApiController;
 use App\Http\Controllers\Api\OrderApiController;
@@ -34,7 +35,7 @@ Route::group(['middleware' => ['auth:api','refresh.token']], function () {
         Route::post('create/alamat' , [ProfilApiController::class,'createAlamat']);
         Route::post('update/alamat' , [ProfilApiController::class,'updateAlamat']);
         Route::delete('delete/alamat/{id}' , [ProfilApiController::class,'deleteAlamat']);
-        Route::post('/status/{status}',[ProfilApiController::class,'statusOnOff']);
+        Route::post('update/status',[ProfilApiController::class,'statusOnOff']);
         Route::get('status' , [ProfilApiController::class,'statusDriverKedai']);
     });
 
@@ -51,7 +52,16 @@ Route::group(['middleware' => ['auth:api','refresh.token']], function () {
     Route::prefix('order')->name('order.')->group(function(){
         Route::get('/{invoice}',[OrderApiController::class,'data_order']);
         Route::post('/create',[OrderApiController::class,'create_order']);
+        Route::post('/update/status',[OrderApiController::class,'updateStatusOrder']);
+        Route::post('/update/driver',[OrderApiController::class, 'addDriverOrder']);
+        Route::post('/posisi/driver',[OrderApiController::class, 'positionDriver']);
     });
+
+    Route::prefix('message')->name('message.')->group(function(){
+        Route::post('/',[ChatApiController::class,'index']);
+        Route::post('/create',[ChatApiController::class,'sendMessage']);
+    });
+
     Route::prefix('wp')->name('wp.')->group(function(){
         Route::get('/{invoice}',[WpApiController::class,'weightProduct']);
     });

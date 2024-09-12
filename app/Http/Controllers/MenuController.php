@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class MenuController extends Controller
 {
@@ -19,7 +20,7 @@ class MenuController extends Controller
         'title' => 'Menu',
         'modul' => 'menu',
     ];
-    
+
     function menu(){
         $this->data['type'] = "index";
         $this->data['data'] = null;
@@ -32,7 +33,7 @@ class MenuController extends Controller
         $this->data['data'] = null;
         $this->data['kedai'] = Kedai::whereNotIn('id', function ($query) {
             $query->select('kedai_id')->from('menus');
-        })->with(['user'])->get();        
+        })->with(['user'])->get();
         $this->data['kategori'] = Kategori::get();
     	return view($this->data['modul'].'.index', $this->data);
     }
@@ -66,10 +67,10 @@ class MenuController extends Controller
                 $btn .= '<div class="text-center">';
                 $btn .= '<div class="btn-group btn-group-solid mx-3">';
                 if ($cek_jumlah != 0) {
-                $btn .= '<a class="btn btn-warning ml-1" href="/menu/update/'.$row->id.'" title="Update"><i class="fa fa-edit"></i></a> &nbsp';
-                $btn .= '<button class="btn btn-danger btn-raised btn-xs" id="btn-hapus" title="hapus semua menu"><i class="fa fa-trash"></i></button>';
+                $btn .= '<a class="btn btn-warning ml-1" href="/menu/update/'.$row->id.'" title="Update"><i class="fa fa-pencil-alt"></i></a> &nbsp';
+                $btn .= '<button class="btn btn-danger btn-raised btn-xs" id="btn-hapus" title="hapus semua menu"><i class="icon-trash"></i></button>';
                 }
-                $btn .= '</div>';    
+                $btn .= '</div>';
                 $btn .= '</div>';
                 return $btn;
             })
@@ -79,12 +80,12 @@ class MenuController extends Controller
                 $jml .= '<div class="text-center">';
                 $jml .= '<div class="btn-group btn-group-solid mx-3">';
                 $jml .= '<p>'.$jumlah.'</p>';
-                $jml .= '</div>';    
+                $jml .= '</div>';
                 $jml .= '</div>';
                 return $jml;
             })
             ->addColumn('status_name', function($row){
-                $status = ''; 
+                $status = '';
                 $status .= '<div class="text-center">';
                 $status .= '<div class="btn-group btn-group-solid mx-3">';
                 if ($row->status == 0) {
@@ -93,18 +94,18 @@ class MenuController extends Controller
                 if ($row->status == 1) {
                     $status .= '<div class="badge rounded-pill bg-success">Buka</div>';
                 }
-                $status .= '</div>';    
+                $status .= '</div>';
                 $status .= '</div>';
                 return $status;
             })
             ->rawColumns(['action','jumlah_menu','status_name'])
             ->make(true);
     }
-    
+
     public function createform(Request $request)
     {
         DB::beginTransaction();
-    
+
         try {
                 $kedai_id = $request->kedai_id;
                 $data = $request->only(
@@ -122,7 +123,7 @@ class MenuController extends Controller
 
                 if (isset($data['nama'])) {
                     foreach ($data['nama'] as $key => $value) {
-                            $gambar_menu = time() . '.' . $data['gambar'][$key]->extension();
+                            $gambar_menu = Str::uuid() . '.' . $data['gambar'][$key]->extension();
                             $data['gambar'][$key]->storeAs('public/image/menu', $gambar_menu);
                             $menu_id = $data['menu_kedai_id'][$key];
                             $menu = new Menu();
@@ -176,12 +177,12 @@ class MenuController extends Controller
                                                 $detail->save();
                                             }
                                         }
-                                        
+
                                     }
 
                                 }
-                                
-                               
+
+
                             }
                     }
                     }
@@ -194,13 +195,13 @@ class MenuController extends Controller
             DB::rollback();
             return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => $e->getMessage(), 'ButtonColor' => '#EF5350', 'type' => 'error']);
         }
-    }    
+    }
 
     public function updateform(Request $request)
     {
         DB::beginTransaction();
         try {
-            
+
                 $kedai_id = $request->kedai_id;
                 $data = $request->only(
                     [
@@ -217,17 +218,17 @@ class MenuController extends Controller
                     ]
                 );
                 $cek_id = [];
-                
+
                 if (isset($data['nama'])) {
-                    
+
                     $existingMenusId = Menu::where('kedai_id', $request->kedai_id)->pluck('id')->toArray();
 
                     $existingKategoriMenu = KategoriPilihMenu::whereIn('menu_id', $existingMenusId)->pluck('id')->toArray();
-                    
+
                     $existingMenuDetail = MenuDetail::whereIn('kategori_pilih_menu_id', $existingKategoriMenu)->pluck('id')->toArray();
-                    
+
                     $cek_id = $data['id'];
-                    
+
                     $itemsToDelete = array_diff($existingMenusId, $cek_id);
                     foreach ($itemsToDelete as $menuId) {
                         $menu_delete = Menu::find($menuId);
@@ -257,23 +258,24 @@ class MenuController extends Controller
                                 if (isset($data['oldImg'][$key])) {
                                     Storage::delete('public/image/menu/' . $data['oldImg'][$key]);
                                 }
-            
+
                                 // Simpan gambar baru
-                                $gambar_menu = time() . '.' . $data['gambar'][$key]->extension();
+                                //menggunakan uuid
+                                $gambar_menu = Str::uuid() . '.' . $data['gambar'][$key]->extension();
                                 $data['gambar'][$key]->storeAs('public/image/menu', $gambar_menu);
                                 $menu->gambar =  $gambar_menu;
                             }else{
                                 $menu->gambar =$data['oldImg'][$key];
                             }
                             $menu->save();
-                    
+
                         if (isset($data['menu_id'])) {
                             $kategori = $request->only(['nama_kategori', 'opsi', 'new_id_kategori', 'menu_id', 'kategori_id','max_pilih']);
 
                             // if (!empty($existingKategoriMenu)) {
                             //     KategoriPilihMenu::whereIn('id', $existingKategoriMenu)->delete();
                             // }
-                            
+
                             foreach ($kategori['nama_kategori'] as $pilihKategori => $value) {
                                 if ($kategori['menu_id'][$pilihKategori] == $menu_id) {
                                     $kategoriPilihan = new KategoriPilihMenu();
@@ -287,12 +289,12 @@ class MenuController extends Controller
                                     $kategoriPilihan->opsi=$kategori['opsi'][$pilihKategori];
                                     $kategoriPilihan->max_pilih=$kategori['max_pilih'][$pilihKategori];
                                     $kategoriPilihan->save();
-                    
+
                                     $dataPilihan = $request->only(['nama_pilihan', 'stok_pilihan', 'harga_pilihan', 'status_pilihan', 'mark_id_kategori', 'id_detail']);
                                     // if (!empty($existingMenuDetail)) {
                                     //     MenuDetail::whereIn('id', $existingMenuDetail)->delete();
                                     // }
-                                    
+
                                     foreach ($dataPilihan['nama_pilihan'] as $pilih => $value) {
                                         if ($dataPilihan['mark_id_kategori'][$pilih] == $id_kategori) {
                                             $detail = new MenuDetail();
@@ -310,7 +312,7 @@ class MenuController extends Controller
                                 }
                             }
                         }
-                    }                    
+                    }
                 }
                 DB::commit();
                 return response()->json(['title' => 'Success!', 'icon' => 'success', 'text' => 'Data Berhasil Diubah!', 'ButtonColor' => '#66BB6A', 'type' => 'success']);
@@ -326,27 +328,27 @@ class MenuController extends Controller
     public function deleteform(Request $request)
     {
         DB::beginTransaction();
-    
+
         try {
-            $kedai = Kedai::findOrFail($request->id); 
+            $kedai = Kedai::findOrFail($request->id);
 
             $menus = Menu::where('kedai_id', $kedai->id)->get();
-            
+
             foreach ($menus as $menu) {
                 // Menghapus gambar jika ada
                 if ($menu->gambar) {
                     Storage::delete('public/image/menu/' . $menu->gambar);
                 }
-            
+
                 // Menghapus menu dari database
                 $menu->delete();
             }
-    
+
             DB::commit();
-            return response()->json(['title' => 'Success!', 'icon' => 'success', 'text' => 'Data Berhasil Dihapus!', 'ButtonColor' => '#66BB6A', 'type' => 'success']); 
+            return response()->json(['title' => 'Success!', 'icon' => 'success', 'text' => 'Data Berhasil Dihapus!', 'ButtonColor' => '#66BB6A', 'type' => 'success']);
         } catch(\Exception $e) {
             DB::rollback();
-            return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => $e->getMessage(), 'ButtonColor' => '#EF5350', 'type' => 'error']); 
-        }   
+            return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => $e->getMessage(), 'ButtonColor' => '#EF5350', 'type' => 'error']);
+        }
     }
 }
