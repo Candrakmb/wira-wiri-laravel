@@ -26,15 +26,16 @@ class ChatApiController extends Controller
                 'pesan'  => $validator->errors()
             ], 422);
         }
-
+        $userAuth = Auth::guard('api')->user();
         $order = Order::where('invoice_number', $request->invoice_number)->first();
-        $sender_id = Auth::guard('api')->user()->id;
-        if( Auth::guard('api')->user()->getRoleNames()->contains('driver')){
-            $pelanggan = Pelanggan::with('user')->where('user_id', $order->pelanggan_id)->first();
+        $sender_id = $userAuth->id;
+        if( $userAuth->getRoleNames()->contains('driver')){
+            $pelanggan = Pelanggan::with('user')->where('id', $order->pelanggan_id)->first();
             $receiver_id = $pelanggan->user->id;
         } else {
-            $driver = Driver::with('user')->where('user_id', $order->driver_id)->first();
+            $driver = Driver::with('user')->where('id', $order->driver_id)->first();
             $receiver_id = $driver->user->id;
+
         }
 
         if($order){
@@ -73,7 +74,7 @@ class ChatApiController extends Controller
         $validator = Validator::make($request->all(), [
             'invoice_number' => 'required|string',
             'receiver_id' => 'required|exists:users,id',
-            'content' => 'required|string',
+            'content' => 'required',
         ]);
 
         if ($validator->fails()) {

@@ -1,8 +1,13 @@
-<?php 
+<?php
 
 function rupiah($number)
 {
     return "Rp " . number_format($number,0,',','.');
+}
+
+function waktu($waktu)
+{
+    return \Carbon\Carbon::parse($waktu)->translatedFormat('H:i');
 }
 
 function tanggal($tanggal){

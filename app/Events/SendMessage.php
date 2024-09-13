@@ -27,10 +27,8 @@ class SendMessage implements ShouldBroadcast
      *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn(): array
+    public function broadcastOn(): Channel
     {
-        return [
-            new Channel('chat-channel.'.$this->message->receiver_id),
-        ];
+        return new PrivateChannel('chat-channel.'.$this->message->receiver_id);
     }
 }
