@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MenuApiController extends Controller
 {
@@ -71,6 +72,36 @@ class MenuApiController extends Controller
             ], 200);
         }
 
+        public function get_menu_with_kategori($id){
+
+            $kedai = Kedai::with(['user'])->where('id', $id)->first();
+
+            // Ambil menu dengan relasi kategori
+            $menu = Menu::with(['customOptions', 'customOptions.menuDetail', 'kategori'])
+                        ->where('kedai_id', $id)
+                        ->orderBy('menus.id', 'desc')
+                        ->get();
+
+            if (!$menu) {
+                return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memuat data',
+                 ], 500);
+             }
+
+
+            // Kelompokkan menu berdasarkan kategori
+            $menuWithKategori = $menu->groupBy(function($item) {
+                return $item->kategori->nama; // 'nama' adalah kolom dari kategori
+            });
+
+            return response()->json([
+                'success' => true,
+                'kedai' => $kedai,
+                'menu' => $menuWithKategori
+            ], 200);
+        }
+
 
     public function get_menu_detail($id){
         $pilihan = MenuDetail::where('kategori_pilih_menu_id ',  $id)->get();
@@ -109,66 +140,99 @@ class MenuApiController extends Controller
     public function createform(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'kedai_id' => 'required',
-            'nama.*' => 'required|string|max:255',
-            'deskripsi.*' => 'required|string',
-            'harga.*' => 'required|numeric',
-            'status.*' => 'required|integer',
-            'gambar.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'kategori.*' => 'required|integer',
-            'menu_kedai_id.*' => 'required|integer',
-            'menu_id.*' => 'nullable|integer',
-            'nama_kategori.*' => 'required|string|max:255',
-            'opsi.*' => 'required|integer',
-            'new_id_kategori.*' => 'nullable|integer',
-            'nama_pilihan.*' => 'required|string|max:255',
-            'stok_pilihan.*' => 'required|integer',
-            'harga_pilihan.*' => 'required|numeric',
-            'status_pilihan.*' => 'required|integer',
+        $rules = [
+            'nama' => 'required|string|max:255',
+            'deskripsi' => 'required|string',
+            'harga' => 'required|numeric',
+            'status' => 'required|integer',
+            'gambar' => 'required',
+            'kategori' => 'required|integer',
+            'nama_kategori.*' => 'nullable|string|max:255',
+            'opsi.*' => 'nullable|integer',
+            'new_kategori_id.*' => 'nullable|integer',
+            'max_pilih.*' => 'nullable|integer',
+            'nama_pilihan.*' => 'nullable|string|max:255',
+            'stok_pilihan.*' => 'nullable|integer',
+            'harga_pilihan.*' => 'nullable|numeric',
+            'status_pilihan.*' => 'nullable|integer',
             'mark_id_kategori.*' => 'nullable|integer',
-        ]);
+        ];
+
+        // Cek validasi awal
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             DB::rollback();
-            return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => 'Validasi gagal. ' . $validator->errors()->first(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal. ' . $validator->errors()->first(),
+            ], 201);
         }
+
+        // Jika ada data tambahan 'nama_kategori', lakukan validasi tambahan
+        if (!empty($request->nama_kategori)) {
+            $rulesAddOn = [
+                'nama_kategori.*' => 'required|string|max:255',
+                'opsi.*' => 'required|integer',
+                'new_kategori_id.*' => 'required|integer',
+                'max_pilih.*' => 'required|integer',
+                'nama_pilihan.*' => 'required|string|max:255',
+                'stok_pilihan.*' => 'required|integer',
+                'harga_pilihan.*' => 'required|numeric',
+                'status_pilihan.*' => 'required|integer',
+                'mark_id_kategori.*' => 'required|integer',
+            ];
+
+            $validatorAddOn = Validator::make($request->all(), $rulesAddOn);
+
+            if ($validatorAddOn->fails()) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal. ' . $validatorAddOn->errors()->first(),
+                ], 201);
+            }
+        }
+
 
         DB::beginTransaction();
         try {
             $user = auth()->guard('api')->user();
             $kedai = Kedai::where('user_id', $user->id)->first();
             $kedai_id = $kedai->id;
-            $data = $request->only(['nama', 'deskripsi', 'harga', 'status', 'gambar', 'kategori', 'menu_kedai_id', 'menu_id']);
 
-            foreach ($data['nama'] as $key => $value) {
-                $gambar_menu = time() . '.' . $data['gambar'][$key]->extension();
-                $data['gambar'][$key]->storeAs('public/image/menu', $gambar_menu);
+                if ($request->hasFile('gambar')) {
+                    foreach ($request->file('gambar') as $gambar) {
+                        $gambar_menu = Str::uuid() . '.' . $gambar->extension();
+                        $gambar->storeAs('public/image/menu', $gambar_menu);
+                    }
+                }
                 $menu = new Menu();
                 $menu->kedai_id = $kedai_id;
-                $menu->nama = $data['nama'][$key];
-                $menu->kategori_id = $data['kategori'][$key];
-                $menu->deskripsi = $data['deskripsi'][$key];
-                $menu->harga = $data['harga'][$key];
-                $menu->status = $data['status'][$key];
+                $menu->nama = $request->nama;
+                $menu->kategori_id = $request->kategori;
+                $menu->deskripsi = $request->deskripsi;
+                $menu->harga = $request->harga;
+                $menu->status = $request->status;
                 $menu->gambar = $gambar_menu;
                 $menu->save();
 
-                if (isset($data['menu_id'][$key])) {
-                    $katetgori = $request->only(['nama_kategori', 'opsi', 'new_id_kategori', 'menu_id']);
-                    foreach ($katetgori['nama_kategori'] as $pilihKategori => $value) {
-                        if ($katetgori['menu_id'][$pilihKategori] == $data['menu_kedai_id'][$key]) {
-                            $katetgoriPilihan = new KategoriPilihMenu();
-                            $katetgoriPilihan->menu_id = $menu->id;
-                            $katetgoriPilihan->nama = $katetgori['nama_kategori'][$pilihKategori];
-                            $katetgoriPilihan->opsi = $katetgori['opsi'][$pilihKategori];
-                            $katetgoriPilihan->save();
+                    $kategori = $request->only(['nama_kategori', 'opsi', 'new_kategori_id' ,'max_pilih']);
+                    if (isset($kategori['nama_kategori']) && count($kategori['nama_kategori']) != 0) {
+                        foreach ($kategori['nama_kategori'] as $pilihKategori => $value) {
+
+                            $kategoriPilihan = new KategoriPilihMenu();
+                            $kategoriPilihan->menu_id = $menu->id;
+                            $kategoriPilihan->nama = $kategori['nama_kategori'][$pilihKategori];
+                            $kategoriPilihan->opsi = $kategori['opsi'][$pilihKategori];
+                            $kategoriPilihan->max_pilih = $kategori['max_pilih'][$pilihKategori];
+                            $kategoriPilihan->save();
 
                             $dataPilihan = $request->only(['nama_pilihan', 'stok_pilihan', 'harga_pilihan', 'status_pilihan', 'mark_id_kategori']);
                             foreach ($dataPilihan['nama_pilihan'] as $pilih => $value) {
-                                if ($dataPilihan['mark_id_kategori'][$pilih] == $katetgori['new_id_kategori'][$pilihKategori]) {
+                                if ($dataPilihan['mark_id_kategori'][$pilih] == $kategori['new_kategori_id'][$pilihKategori]) {
                                     $detail = new MenuDetail();
-                                    $detail->kategori_pilih_menu_id = $katetgoriPilihan->id;
+                                    $detail->kategori_pilih_menu_id = $kategoriPilihan->id;
                                     $detail->nama_pilihan = $dataPilihan['nama_pilihan'][$pilih];
                                     $detail->harga = $dataPilihan['harga_pilihan'][$pilih];
                                     $detail->status = $dataPilihan['status_pilihan'][$pilih];
@@ -176,54 +240,86 @@ class MenuApiController extends Controller
                                     $detail->save();
                                 }
                             }
-                        }
                     }
                 }
-            }
+
+
+
             DB::commit();
-            return response()->json(['title' => 'Success!', 'icon' => 'success', 'text' => 'Data Berhasil Ditambah!', 'ButtonColor' => '#66BB6A', 'type' => 'success'], 200);
+            return response()->json(['success' => true, 'massage' => 'menu berhasil ditambah'], 200);
         } catch (\Exception $e) {
+            if ($menu->gambar) {
+                Storage::delete('public/image/menu/' . $menu->gambar);
+            }
             DB::rollback();
-            return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => $e->getMessage(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 500);
+            return response()->json([ 'success'=> false, 'massage' => $e->getMessage()], 500);
         }
     }
 
     public function updateform(Request $request){
 
-        $validator = Validator::make($request->all(), [
-            'kedai_id' => 'required',
+        $rules = [
             'menu_id' => 'required|integer',
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'harga' => 'required|numeric',
             'status' => 'required|integer',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'gambar' => 'nullable',
             'kategori' => 'required|integer',
             'kategori_detail_id.*' => 'nullable|integer',
-            'nama_kategori.*' => 'required|string|max:255',
-            'opsi.*' => 'required|integer',
+            'nama_kategori.*' => 'nullable|string|max:255',
+            'opsi.*' => 'nullable|integer',
+            'max_pilih.*' => 'nullable|integer',
             'id_detail.*' => 'nullable|integer',
-            'nama_pilihan.*' => 'required|string|max:255',
-            'stok_pilihan.*' => 'required|integer',
-            'harga_pilihan.*' => 'required|numeric',
-            'status_pilihan.*' => 'required|integer',
+            'nama_pilihan.*' => 'nullable|string|max:255',
+            'stok_pilihan.*' => 'nullable|integer',
+            'harga_pilihan.*' => 'nullable|numeric',
+            'status_pilihan.*' => 'nullable|integer',
             'mark_id_kategori.*' => 'nullable|integer',
-        ]);
+        ];
+
+        // Cek validasi awal
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
+            DB::rollback();
             return response()->json([
-                'title' => 'Error',
-                'icon' => 'error',
-                'text' => 'Validasi gagal. ' . $validator->errors()->first(),
-                'ButtonColor' => '#EF5350',
-                'type' => 'error'
-            ], 400);
+                'success' => false,
+                'message' => 'Validasi gagal. ' . $validator->errors()->first(),
+            ], 201);
+        }
+
+        // Jika ada data tambahan 'nama_kategori', lakukan validasi tambahan
+        if (!empty($request->nama_kategori)) {
+            $rulesAddOn = [
+                'kategori_detail_id.*' => 'nullable|integer',
+                'nama_kategori.*' => 'required|string|max:255',
+                'opsi.*' => 'required|integer',
+                'max_pilih.*' => 'required|integer',
+                'id_detail.*' => 'nullable|integer',
+                'nama_pilihan.*' => 'required|string|max:255',
+                'stok_pilihan.*' => 'required|integer',
+                'harga_pilihan.*' => 'required|numeric',
+                'status_pilihan.*' => 'required|integer',
+                'mark_id_kategori.*' => 'required|integer',
+            ];
+
+            $validatorAddOn = Validator::make($request->all(), $rulesAddOn);
+
+            if ($validatorAddOn->fails()) {
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal. ' . $validatorAddOn->errors()->first(),
+                ], 201);
+            }
         }
         // dd($request->all());
         DB::beginTransaction();
         $user = auth()->guard('api')->user();
         $kedai = Kedai::where('user_id', $user->id)->first();
         try {
+            $oldImage = null;
             $kedai_id = $kedai->id;
             $menu = Menu::findOrFail($request->menu_id);
             $menu->kedai_id = $kedai_id;
@@ -234,12 +330,16 @@ class MenuApiController extends Controller
             $menu->status = $request->status;
 
             if ($request->hasFile('gambar')) {
-                if ($menu->gambar) {
-                    Storage::delete('public/image/menu/' . $menu->gambar);
+
+
+                foreach ($request->file('gambar') as $gambar) {
+                    $gambar_menu = Str::uuid() . '.' . $gambar->extension();
+                    $gambar->storeAs('public/image/menu', $gambar_menu);
                 }
 
-                $gambar_menu = time() . '.' . $request->gambar->extension();
-                $request->gambar->storeAs('public/image/menu', $gambar_menu);
+                if ($menu->gambar) {
+                    $oldImage =  $menu->gambar;
+                }
                 $menu->gambar = $gambar_menu;
             }
 
@@ -254,7 +354,7 @@ class MenuApiController extends Controller
                     KategoriPilihMenu::where('menu_id', $request->menu_id)->delete();
                 }
 
-                $kategoriData = $request->only(['nama_kategori', 'opsi', 'kategori_detail_id']);
+                $kategoriData = $request->only(['nama_kategori', 'opsi', 'kategori_detail_id','max_pilih']);
 
                 if (!empty($kategoriData['kategori_detail_id'])) {
 
@@ -268,6 +368,7 @@ class MenuApiController extends Controller
                     $kategoriPilihan->menu_id = $request->menu_id;
                     $kategoriPilihan->nama = $kategoriData['nama_kategori'][$index];
                     $kategoriPilihan->opsi = $kategoriData['opsi'][$index];
+                    $kategoriPilihan->max_pilih=$kategoriData['max_pilih'][$index];
                     $kategoriPilihan->save();
 
                     $dataPilihan = $request->only(['nama_pilihan', 'stok_pilihan', 'harga_pilihan', 'status_pilihan', 'mark_id_kategori','id_detail']);
@@ -291,24 +392,19 @@ class MenuApiController extends Controller
             }
 
             DB::commit();
-
+            if ($oldImage) {
+                Storage::delete('public/image/menu' . $oldImage);
+            }
             return response()->json([
-                'title' => 'Success!',
-                'icon' => 'success',
-                'text' => 'Data Berhasil Ditambah!',
-                'ButtonColor' => '#66BB6A',
-                'type' => 'success',
-                'data' => $request->all()
+                'success' => true,
+                'massage' => 'menu berhasil diupdate',
             ], 200);
 
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'title' => 'Error',
-                'icon' => 'error',
-                'text' => $e->getMessage(),
-                'ButtonColor' => '#EF5350',
-                'type' => 'error'
+                'success' => false,
+                'massage' => $e->getMessage(),
             ], 500);
         }
 
@@ -333,20 +429,14 @@ class MenuApiController extends Controller
 
             DB::commit();
             return response()->json([
-                'title' => 'Success!',
-                'icon' => 'success',
-                'text' => 'Data Berhasil Dihapus!',
-                'ButtonColor' => '#66BB6A',
-                'type' => 'success'
+                'success'  => true,
+                'massage' => 'menu berhasil dihapus',
             ], 200);
         } catch(\Exception $e) {
             DB::rollback();
             return response()->json([
-                'title' => 'Error',
-                'icon' => 'error',
-                'text' => $e->getMessage(),
-                'ButtonColor' => '#EF5350',
-                'type' => 'error'
+                'success' => false,
+                'massage' => $e->getMessage(),
             ], 500);
         }
     }

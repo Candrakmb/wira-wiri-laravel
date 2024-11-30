@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\NotifyDriver;
+use App\Events\NotifyKedai;
 use App\Events\PosisiDriver;
 use App\Events\StatusOrder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
+use App\Models\Kedai;
 use App\Models\Menu;
 use App\Models\MenuDetail;
 use App\Models\Order;
@@ -14,6 +17,9 @@ use App\Models\OrderDestination;
 use App\Models\OrderDetail;
 use App\Models\OrderDetailEkstra;
 use App\Models\Pelanggan;
+use App\Models\User;
+use App\Notifications\sendNotifToKedai;
+use App\Notifications\StatusOrderNotification;
 use App\Services\Midtrans\CreateSnapTokenService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +45,34 @@ class OrderApiController extends Controller
         $order = Order::where('invoice_number',$invoice)->first();
 
         if ($order) {
+            $userAuth = auth()->guard('api')->user();
+            if($userAuth->getRoleNames()->contains('driver') && $order->driver_id != null){
+                $cekDriver = Driver::where('user_id',$userAuth->id)->first();
+                if($cekDriver->id == $order->driver_id){
+                    $akses = true;
+                }else{
+                    $akses = false;
+                }
+            } else if($userAuth->getRoleNames()->contains('driver') && $order->driver_id == null){
+                $akses = false;
+            } else if ($userAuth->getRoleNames()->contains('user')) {
+                $cekPelanggan = Pelanggan::where('user_id',$userAuth->id)->first();
+                if($cekPelanggan->id == $order->pelanggan_id){
+                    $akses = true;
+                }else{
+                    $akses = false;
+                }
+            } else {
+                $akses = false;
+            }
+
+            if(!$akses){
+                return response()->json([
+                    'success' => false,
+                    'pesan' => 'Anda tidak memiliki akses',
+                ], 200);
+            }
+
             if($order->driver_id != null) {
                 $driver =  Driver::select('id', 'user_id', 'no_whatsapp','no_plat','latitude','longitude')
                 ->with(['user' => function($query) {
@@ -121,7 +155,7 @@ class OrderApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => 'Validasi gagal. ' . $validator->errors()->first(), 'ButtonColor' => '#EF5350', 'type' => 'error'], 400);
+            return response()->json(['success' => false, 'text' => 'Validasi gagal. ' . $validator->errors()->first()], 400);
         }
 
         $admin = 0;
@@ -246,22 +280,17 @@ class OrderApiController extends Controller
                 }
             }
             DB::commit();
+            $serchingDriver = new WpApiController();
+            $serchingDriver->weightProduct($order->invoice_number);
             return response()->json([
-                'title' => 'Success!',
-                'icon' => 'success',
-                'text' => 'Data Berhasil Ditambah!',
-                'ButtonColor' => '#66BB6A',
-                'type' => 'success',
+                'success' => true,
                 'data_order' => $order
             ], 200);
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'title' => 'Error',
-                'icon' => 'error',
+                'success' => false,
                 'text' => $e->getMessage(),
-                'ButtonColor' => '#EF5350',
-                'type' => 'error'
             ], 500);
         }
     }
@@ -278,12 +307,13 @@ class OrderApiController extends Controller
         DB::beginTransaction();
         try {
             $order = Order::where('invoice_number',$request->invoice_number)->first();
+
             if($order){
                 $order->status_order = $request->status_order;
                 $order->save();
             }
 
-            if($request->status_order == 6){
+            if($request->status_order == 7){
                 $driver = Driver::where('id', $order->driver_id)->first();
                 $driver->status = 1;
                 $driver->time_on = Carbon::now();
@@ -291,8 +321,11 @@ class OrderApiController extends Controller
             } else {
                 $driver = null;
             }
+            $pelanggan = Pelanggan::where('id', $order->pelanggan_id)->first();
+            $user = User::where('id', $pelanggan->user_id)->first();
 
             broadcast(new StatusOrder($order))->toOthers();
+            $user->notify(new StatusOrderNotification($order));
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -334,13 +367,23 @@ class OrderApiController extends Controller
                 $order->driver_id = $driver->id;
                 $order->save();
 
-                $driver->status = 2;
+                $driver->status = 3;
                 $driver->save();
 
                 $order->load(['driver','driver.user']);
                 // dd($order);
                 broadcast(new StatusOrder($order))->toOthers();
                 DB::commit();
+
+                $orderDestination = OrderDestination::where('order_id', $order->id)
+                                    ->whereNotNull('kedai_id')
+                                    ->get();
+                $orderDestination->load(['kedai', 'kedai.user']);
+                foreach ($orderDestination as $item) {
+                    $user = User::where('id', $item->kedai->user_id)->first();
+                    broadcast(new NotifyKedai($item))->toOthers();
+                    $user->notify(new sendNotifToKedai());
+                }
                 return response()->json([
                     'success' => true,
                     'data_order' => $order,
@@ -361,6 +404,67 @@ class OrderApiController extends Controller
         }
     }
 
+    public function orderViewKedai()
+    {
+        $user = auth()->guard('api')->user();
+        $kedai = Kedai::where('user_id', $user->id)->first();
+
+        if (!$kedai) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kedai not found',
+            ], 404);
+        }
+
+        $orderIds = OrderDestination::where('kedai_id', $kedai->id)->pluck('order_id');
+        $orders = Order::whereIn('id', $orderIds)
+                        ->whereBetween('status_order', [1, 6])
+                        ->whereDate('created_at', Carbon::today())
+                        ->with(['driver', 'driver.user', 'pelanggan', 'pelanggan.user'])
+                        ->get();
+
+        // Ambil order_id dari $orders yang sudah difilter
+        $filteredOrderIds = $orders->pluck('id');
+
+        $menuIds = Menu::where('kedai_id', $kedai->id)->pluck('id');
+        $orderDetails = OrderDetail::with(['menu'])
+                                    ->whereIn('menu_id', $menuIds)
+                                    ->whereIn('order_id', $filteredOrderIds) // Filter sesuai order_id dari $orders
+                                    ->get();
+
+        $selectedMenu = $orderDetails->map(function ($detail) {
+            $extras = OrderDetailEkstra::with(['menuDetail.kategoriPilihan'])
+                                    ->where('order_detail_id', $detail->id)
+                                    ->get()
+                                    ->map(function ($ekstra) {
+                                        return [
+                                            'nama_kategori' => $ekstra->menuDetail->kategoriPilihan->nama,
+                                            'nama_pilihan' => $ekstra->menuDetail->nama_pilihan,
+                                            'price_ekstra' => $ekstra->menuDetail->harga,
+                                        ];
+                                    });
+
+            return [
+                'order_id' => $detail->order_id,
+                'menu_id' => $detail->menu->id,
+                'catatan' => $detail->catatan,
+                'kedai_id' => $detail->menu->kedai_id,
+                'price' => $detail->price,
+                'qty' => $detail->qty,
+                'menu' => $detail->menu->nama,
+                'ekstra' => $extras,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'order' => $orders,
+            'selectedMenu' => $selectedMenu,
+        ], 200);
+    }
+
+
+
     public function positionDriver(Request $request){
         $validator = Validator::make($request->all(), [
             'latitude' => 'required',
@@ -373,7 +477,7 @@ class OrderApiController extends Controller
         }
         DB::beginTransaction();
         $order = Order::where('invoice_number',$request->invoice_number)->first();
-        $userAuth = $userAuth = auth()->guard('api')->user();
+        $userAuth = auth()->guard('api')->user();
         if($userAuth->getRoleNames()->contains('driver')){
             $driver = Driver::where('user_id',$userAuth->id)->first();
         } else {
@@ -402,6 +506,28 @@ class OrderApiController extends Controller
                 'success' => false,
                 'text' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function cancelOrder($invoice_number){
+        $order = Order::where('invoice_number',$invoice_number)->first();
+        if($order){
+            DB::beginTransaction();
+            try {
+                $order->status_order = 8;
+                $order->save();
+                DB::commit();
+                return response()->json([
+                    'success' => true,
+                    'massage' => 'order berhasil dibatalkan',
+                ], 200);
+            } catch (\Exception $e){
+                DB::rollback();
+                return response()->json([
+                    'success' => false,
+                    'text' => $e->getMessage(),
+                ], 500);
+            }
         }
     }
 }

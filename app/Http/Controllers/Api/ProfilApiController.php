@@ -14,15 +14,18 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProfilApiController extends Controller
 {
 
     public function statusDriverKedai(){
         $user = auth()->guard('api')->user();
-        if ($user->getRoleNames()->contains('kedai')) {
+
+        if ($user->hasRole('kedai')) {
             $status = Kedai::where('user_id', $user->id)->first();
-        }if($user->getRoleNames()->contains('driver')){
+        } else if($user->hasRole('driver')){
             $status = Driver::where('user_id', $user->id)->first();
         }else {
             return response()->json([
@@ -48,7 +51,7 @@ class ProfilApiController extends Controller
 
         $user = auth()->guard('api')->user();
 
-        if ($user->getRoleNames()->contains('kedai')) {
+        if ($user->hasRole('kedai')) {
             $kedai = Kedai::where('user_id', $user->id)->update([
                 'status' => $request->status,
             ]);
@@ -58,7 +61,7 @@ class ProfilApiController extends Controller
                 'status' => $kedai,
             ], 200);
 
-        } elseif ($user->getRoleNames()->contains('driver')) {
+        } elseif ($user->hasRole('driver')) {
             $driver = Driver::where('user_id', $user->id)->update([
                 'status' => $request->status,
                 'time_on' => $request->status == 1 ? Carbon::now() : null,
@@ -115,15 +118,15 @@ class ProfilApiController extends Controller
             'no_whatsapp' => ['required', 'string', 'regex:/^\+62\d{8,12}$/'],
         ];
 
-        if ($user->getRoleNames()->contains('driver')) {
+        if ($user->hasRole('driver')) {
             $rules = array_merge($rules, [
                 'tanggal_lahir' => 'required|date',
                 'jenis_kelamin' => 'required',
                 'alamat' => 'required|string|max:255',
-                'no_plat' => 'required|string|unique:drivers,no_plat,' . $user->id,
+                'no_plat' => 'required|string|unique:drivers,no_plat,' .  $user->id . ',user_id',
             ]);
         } elseif ($user->getRoleNames()->contains('kedai')) {
-            $rules = array_merge($rules, [
+            $rules = array_merge($rules,[
                 'alamat' => 'required|string|max:255',
                 'latitude' => 'required',
                 'longitude' => 'required',
@@ -145,50 +148,93 @@ class ProfilApiController extends Controller
         DB::beginTransaction();
 
         try {
-            User::where('id', $user->id)->update([
+            $img = '';
+            $oldImage = '';
+            $userId = $user->id;
+            $role = $user->getRoleNames()[0];
+
+            // Update user basic information
+            User::where('id', $userId)->update([
                 'name' => $request->name,
                 'email' => $request->email,
             ]);
 
-            if ($user->getRoleNames()->contains('user')) {
-                Pelanggan::where('user_id', $user->id)->update([
-                    'no_whatsapp' => $request->no_whatsapp,
-                ]);
-            } elseif ($user->getRoleNames()->contains('driver')) {
-                Driver::where('user_id', $user->id)->update([
-                    'no_whatsapp' => $request->no_whatsapp,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'jenis_kelamin' => $request->jenis_kelamin,
-                    'alamat' => $request->alamat,
-                    'no_plat' => $request->no_plat,
-                ]);
-            } else {
-                Kedai::where('user_id', $user->id)->update([
-                    'no_whatsapp' => $request->no_whatsapp,
-                    'alamat' => $request->alamat,
-                    'latitude' => $request->latitude,
-                    'longitude' => $request->longitude,
-                ]);
+            // Handle image upload
+            if ($request->hasFile('profil')) {
+                $placeImg = match ($role) {
+                    'user' => 'public/image/pelanggan',
+                    'driver' => 'public/image/driver',
+                    default => 'public/image/kedai',
+                };
+
+                foreach ($request->file('profil') as $profil) {
+                    $profil_menu = Str::uuid() . '.' . $profil->extension();
+                    $profil->storeAs($placeImg, $profil_menu);
+                }
+
+                $img = $profil_menu;
+            }
+
+            // Update specific role-based data
+            $oldImageField = '';
+            $roleData = [
+                'no_whatsapp' => $request->no_whatsapp,
+                'img_profil' => $img
+            ];
+
+            switch ($role) {
+                case 'user':
+                    $pelanggan = Pelanggan::where('user_id', $userId)->first();
+                    $oldImage = $pelanggan?->img_profil;
+                    Pelanggan::where('user_id', $userId)->update($roleData);
+                    break;
+
+                case 'driver':
+                    $driver = Driver::where('user_id', $userId)->first();
+                    $oldImage = $driver?->img_profil;
+                    $roleData = array_merge($roleData, [
+                        'tanggal_lahir' => $request->tanggal_lahir,
+                        'jenis_kelamin' => $request->jenis_kelamin,
+                        'alamat' => $request->alamat,
+                        'no_plat' => $request->no_plat,
+                    ]);
+                    Driver::where('user_id', $userId)->update($roleData);
+                    break;
+
+                default:
+                    $kedai = Kedai::where('user_id', $userId)->first();
+                    $oldImage = $kedai?->img_profil;
+                    $roleData = [
+                        'alamat' => $request->alamat,
+                        'latitude' => $request->latitude,
+                        'longitude' => $request->longitude,
+                        'no_whatsapp' => $request->no_whatsapp,
+                        'img' => $img,
+                    ];
+                    Kedai::where('user_id', $userId)->update($roleData);
             }
 
             DB::commit();
+
+            // Delete old image if exists
+            if ($oldImage) {
+                Storage::delete("{$placeImg}/{$oldImage}");
+            }
+
             return response()->json([
-                'title' => 'Success!',
-                'icon' => 'success',
-                'text' => 'Data Berhasil Ditambah!',
-                'ButtonColor' => '#66BB6A',
-                'type' => 'success'
+                'success' => true,
+                'message' => 'Data berhasil diperbarui',
             ], 200);
+
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
             return response()->json([
-                'title' => 'Error',
-                'icon' => 'error',
-                'text' => $e->getMessage(),
-                'ButtonColor' => '#EF5350',
-                'type' => 'error'
+                'success' => false,
+                'message' => 'Gagal memperbarui data',
+                'error' => $e->getMessage()
             ], 500);
         }
+
     }
 
     public function getAlamat(){

@@ -2,11 +2,15 @@
 
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\ChatApiController;
+use App\Http\Controllers\Api\IncomeDriverApiController;
 use App\Http\Controllers\Api\MenuApiController;
 use App\Http\Controllers\Api\MidtransApiController;
 use App\Http\Controllers\Api\OrderApiController;
 use App\Http\Controllers\Api\ProfilApiController;
+use App\Http\Controllers\Api\PushSubscriptionController;
+use App\Http\Controllers\Api\QueueApiController;
 use App\Http\Controllers\Api\RegisterApiController;
+use App\Http\Controllers\Api\RiwayatOrderApiController;
 use App\Http\Controllers\Api\WpApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +31,7 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::group(['middleware' => ['auth:api','refresh.token']], function () {
     Route::get('/user' , [ProfilApiController::class,'get_profil']);
-    Route::prefix('profil')->name('menu.')->group(function(){
+    Route::prefix('profil')->name('profil.')->group(function(){
         Route::post('update' , [ProfilApiController::class,'update_profil']);
         Route::get('alamat' , [ProfilApiController::class,'getAlamat']);
         Route::get('detail/alamat/{id}' , [ProfilApiController::class,'getAlamatUpdate']);
@@ -42,6 +46,7 @@ Route::group(['middleware' => ['auth:api','refresh.token']], function () {
     Route::prefix('menu')->name('menu.')->group(function(){
         Route::post('/kedai' , [MenuApiController::class,'get_kedai']);
         Route::post('/get/{id}',[MenuApiController::class,'get_menu']);
+        Route::get('/kategori_menu/{id}', [MenuApiController::class, 'get_menu_with_kategori']);
         Route::get('/create',[MenuApiController::class,'create']);
         Route::get('/update/{id}',[MenuApiController::class,'update']);
         Route::post('/createform',[MenuApiController::class,'createform']);
@@ -55,17 +60,32 @@ Route::group(['middleware' => ['auth:api','refresh.token']], function () {
         Route::post('/update/status',[OrderApiController::class,'updateStatusOrder']);
         Route::post('/update/driver',[OrderApiController::class, 'addDriverOrder']);
         Route::post('/posisi/driver',[OrderApiController::class, 'positionDriver']);
+        Route::get('/view/kedai',[OrderApiController::class, 'orderViewKedai']);
     });
 
     Route::prefix('message')->name('message.')->group(function(){
         Route::post('/',[ChatApiController::class,'index']);
         Route::post('/create',[ChatApiController::class,'sendMessage']);
     });
+    Route::prefix('queue')->name('queue.')->group(function(){
+        Route::get('/',[QueueApiController::class,'index']);
+    });
+    Route::prefix('riwayat')->name('riwayat.')->group(function(){
+        Route::get('/',[RiwayatOrderApiController::class,'riwayatDriverPelanggan']);
+        Route::get('/kedai',[RiwayatOrderApiController::class,'riwayatKedai']);
+    });
 
     Route::prefix('wp')->name('wp.')->group(function(){
         Route::get('/{invoice}',[WpApiController::class,'weightProduct']);
     });
+
+    Route::prefix('income')->name('income.')->group(function(){
+        Route::get('/',[IncomeDriverApiController::class,'index']);
+    });
+
     Route::post('logout', [AuthApiController::class, 'logout']);
+    Route::post('/save-subscription', [PushSubscriptionController::class, 'store']);
+    Route::post('/delete-subscription', [PushSubscriptionController::class, 'destroy']);
 
 });
 

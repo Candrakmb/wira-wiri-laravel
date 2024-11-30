@@ -17,3 +17,6 @@ function tanggal($tanggal){
     return \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y');
 }
 
+function statusOrder($status){
+    
+}

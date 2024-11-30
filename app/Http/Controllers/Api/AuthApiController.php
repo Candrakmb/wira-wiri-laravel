@@ -14,6 +14,7 @@ class AuthApiController extends Controller
     public function logout(Request $request)
     {
         try {
+            
             JWTAuth::invalidate(JWTAuth::getToken());
 
             return response()->json([

@@ -21,7 +21,7 @@ class UserController extends Controller
         'title' => 'User',
         'modul' => 'user',
     ];
-    
+
     function user(){
         $this->data['type'] = "index";
         $this->data['data'] = null;
@@ -68,12 +68,12 @@ class UserController extends Controller
                 if (!$row->getRoleNames()->contains('admin') && !$row->getRoleNames()->contains('user')) {
                     $btn .= '<button class="btn btn-danger btn-raised btn-xs" id="btn-hapus" title="Hapus"><i class="fa fa-trash"></i></button>';
                 }
-                $btn .= '</div>';    
+                $btn .= '</div>';
                 $btn .= '</div>';
                 return $btn;
             })
             ->addColumn('role', function($row){
-                $status = ''; 
+                $status = '';
                 $status .= '<div class="text-center">';
                 $status .= '<div class="btn-group btn-group-solid mx-3">';
                 if ($row->getRoleNames()->contains('user')) {
@@ -88,18 +88,18 @@ class UserController extends Controller
                 if ($row->getRoleNames()->contains('kedai')) {
                     $status .= '<div class="badge rounded-pill bg-secondary">Kedai</div>';
                 }
-                $status .= '</div>';    
+                $status .= '</div>';
                 $status .= '</div>';
                 return $status;
             })
             ->rawColumns(['action','role'])
             ->make(true);
     }
-    
+
     public function createform(Request $request)
     {
         DB::beginTransaction();
-    
+
         try {
 
                 $role = $request->role;
@@ -144,8 +144,8 @@ class UserController extends Controller
                                 $userDriver->assignRole('driver');
 
                                 $driver = new Driver();
-                                $profil = time() . '.' . $data['profil'][$key]->extension();
-                                $data['profil'][$key]->storeAs('public/image/driver', $profil);
+                                $profil = time() . '.' . $dataRole['profil'][$key]->extension();
+                                $dataRole['profil'][$key]->storeAs('public/image/driver', $profil);
                                 $driver->user_id=$userDriver->id;
                                 $driver->id=(string) Str::uuid();
                                 $driver->no_whatsapp=$dataRole['no_wa'][$key];
@@ -157,9 +157,10 @@ class UserController extends Controller
                                 $driver->img_profil = $profil;
                                 $driver->save();
 
-                                
+
                             }
                             if ($role == 'kedai'){
+
                                 $dataRole = $request->only(
                                     [
                                         'password',
@@ -179,8 +180,8 @@ class UserController extends Controller
                                 $userKedai->assignRole('kedai');
 
                                 $kedai = new Kedai();
-                                $profil = time() . '.' . $data['profil'][$key]->extension();
-                                $data['profil'][$key]->storeAs('public/image/kedai', $profil);
+                                $profil_image = time() . '.' . $dataRole['profil'][$key]->extension();
+                                $dataRole['profil'][$key]->storeAs('public/image/kedai', $profil_image);
                                 $kedai->user_id=$userKedai->id;
                                 $kedai->id=(string) Str::uuid();
                                 $kedai->no_whatsapp=$dataRole['no_wa'][$key];
@@ -188,9 +189,9 @@ class UserController extends Controller
                                 $kedai->longitude = $dataRole['longitud'][$key];
                                 $kedai->alamat = $dataRole['alamat'][$key];
                                 $kedai->status= '0';
-                                $kedai->img = $profil;
+                                $kedai->img = $profil_image;
                                 $kedai->save();
-                                
+
                             }
                             if ($role == 'pelanggan') {
                                 $dataRole = $request->only(
@@ -212,11 +213,11 @@ class UserController extends Controller
                                 $pelanggan->id=(string) Str::uuid();
                                 $pelanggan->no_whatsapp=$dataRole['no_wa'][$key];
                                 $pelanggan->save();
-                                
+
                             }
-                            
+
                         }
-                       
+
                     }
                 DB::commit();
                 return response()->json(['title' => 'Success!', 'icon' => 'success', 'text' => 'Data Berhasil Ditambah!', 'ButtonColor' => '#66BB6A', 'type' => 'success']);
@@ -227,7 +228,7 @@ class UserController extends Controller
             DB::rollback();
             return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => $e->getMessage(), 'ButtonColor' => '#EF5350', 'type' => 'error']);
         }
-    }    
+    }
 
     public function updateform(Request $request)
     {
@@ -260,11 +261,11 @@ class UserController extends Controller
                         if ($driver->img_profil && Storage::exists('public/image/driver/' . $driver->img_profil)) {
                             Storage::delete('public/image/driver/' . $driver->img_profil);
                         }
-                
+
                         // Memproses gambar baru
                         $profil = time() . '.' . $request->file('profil')->extension();
                         $request->file('profil')->storeAs('public/image/driver', $profil);
-                
+
                         // Memperbarui data driver dengan gambar baru
                         $driver->img_profil = $profil;
                     }
@@ -281,11 +282,11 @@ class UserController extends Controller
                         if ($kedai->img && Storage::exists('public/image/kedai/' . $kedai->img)) {
                             Storage::delete('public/image/kedai/' . $kedai->img);
                         }
-                
+
                         // Memproses gambar baru
                         $profil = time() . '.' . $request->file('profil')->extension();
                         $request->file('profil')->storeAs('public/image/kedai', $profil);
-                
+
                         // Memperbarui data Kedai dengan gambar baru
                         $kedai->img = $profil;
                     }
@@ -313,15 +314,15 @@ class UserController extends Controller
     public function deleteform(Request $request)
     {
         DB::beginTransaction();
-    
+
         try {
             User::where('id', $request->id)->delete();
-    
+
             DB::commit();
-            return response()->json(['title' => 'Success!', 'icon' => 'success', 'text' => 'Data Berhasil Dihapus!', 'ButtonColor' => '#66BB6A', 'type' => 'success']); 
+            return response()->json(['title' => 'Success!', 'icon' => 'success', 'text' => 'Data Berhasil Dihapus!', 'ButtonColor' => '#66BB6A', 'type' => 'success']);
         } catch(\Exception $e) {
             DB::rollback();
-            return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => $e->getMessage(), 'ButtonColor' => '#EF5350', 'type' => 'error']); 
-        }   
+            return response()->json(['title' => 'Error', 'icon' => 'error', 'text' => $e->getMessage(), 'ButtonColor' => '#EF5350', 'type' => 'error']);
+        }
     }
 }

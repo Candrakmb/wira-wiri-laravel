@@ -44,7 +44,6 @@ class weightedProduct
         usort($finalScores, function($a, $b) {
             return $b['score'] <=> $a['score'];
         });
-
         return $finalScores;
     }
 

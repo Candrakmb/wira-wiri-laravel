@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Driver;
 use App\Models\Message;
 use App\Models\Order;
 use App\Models\Pelanggan;
@@ -56,3 +57,10 @@ Broadcast::channel('chat-channel.{id}', function ($user, $id) {
     return $user->id === $id;
 });
 
+Broadcast::channel('notif_driver.{id}', function ($user, $id) {
+    return $user->id === $id;
+});
+
+Broadcast::channel('notif_kedai.{id}', function ($user, $id) {
+    return $user->id === $id;
+});

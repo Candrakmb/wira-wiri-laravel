@@ -32,11 +32,17 @@ class Driver extends Model
     protected $fillable = [
         'id',
         'no_whatsapp',
-        'img_profil'
+        'img_profil',
+        'jenis_kelamin',
+        'status',
+        'time_on',
+        'alamat',
+        'latitude',
+        'longitude'
     ];
     protected $appends = ['img_url'];
 
-   
+
     /**
      * Boot function from laravel.
      */
@@ -67,6 +73,6 @@ class Driver extends Model
     }
     public function getImgUrlAttribute()
     {
-        return $this->img_profil ? url('storage/image/driver/' . $this->img_profil) : null;
+        return $this->img_profil ? url('storage/image/driver/' . $this->img_profil) : url('assets/img/no-image.jpg');
     }
 }
