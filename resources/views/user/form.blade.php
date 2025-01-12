@@ -6,12 +6,12 @@
       <div class="col-12">
         <div class="card-plus p-3 d-flex justify-content-center">
         <div class="wrapper-radio z-index-2">
-          <div class="option-radio">
+          {{-- <div class="option-radio">
             <input class="input-radio role" type="radio" name="role" value="pelanggan" checked="">
             <div class="btn-radio">
               <span class="span-radio">Pelanggan</span>
             </div>
-          </div>
+          </div> --}}
           <div class="option-radio">
             <input class="input-radio role" type="radio" name="role" value="driver">
             <div class="btn-radio">
@@ -21,7 +21,7 @@
             <input class="input-radio role" type="radio" name="role" value="kedai">
             <div class="btn-radio">
               <span class="span-radio">Kedai</span>
-            </div>  
+            </div>
           </div>
         </div>
       </div>
@@ -162,7 +162,7 @@
               <select name="jenis_kelamin" id="jenis_kelamin" class="form-select select jenis_kelamin">
                 <option value="" readonly>pilih....</option>
                 <option value="L" {{ $driver->jenis_kelamin == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                <option value="P" {{ $driver->jenis_kelamin == 'P' ? 'selected' : '' }}>Perempuan</option>                
+                <option value="P" {{ $driver->jenis_kelamin == 'P' ? 'selected' : '' }}>Perempuan</option>
               </select>
               </div>
               @endif
@@ -199,14 +199,14 @@
           <div class="card-plus text-center">
             <div class="row">
               <div class="col" >
-                <button type="button" class="button-primary" id="simpan" > 
+                <button type="button" class="button-primary" id="simpan" >
                 SUBMIT
               </button>
             </div>
           </form>
               @if($type == 'create')
-              <div class="col"> 
-                <button type="button" class="button-primary" id="add_row"> 
+              <div class="col">
+                <button type="button" class="button-primary" id="add_row">
                 + ADD
               </button>
               @endif
@@ -214,5 +214,5 @@
             </div>
           </div>
         </div>
-      </div>                           
+      </div>
 </div>

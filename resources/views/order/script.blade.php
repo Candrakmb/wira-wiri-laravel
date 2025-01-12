@@ -110,7 +110,6 @@
             filterKolom(t);
             hideKolom(t);
             cetak(t);
-
         };
 
 
@@ -174,7 +173,7 @@
                     map()
                 @endif
                 setData();
-               
+
             }
         }
     }();
@@ -186,6 +185,5 @@
         });
         $.fn.dataTable.ext.errMode = 'none';
         data.init();
-        
     });
 </script>

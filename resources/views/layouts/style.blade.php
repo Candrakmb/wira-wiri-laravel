@@ -148,7 +148,7 @@
         --bg-color: #fff;
         --main-color: #323232;
         position: relative;
-        width: 250px;
+        width: 170px;
         height: 36px;
         background-color: var(--bg-color);
         border: 2px solid var(--main-color);
@@ -228,10 +228,10 @@
     }
 
     .header_file img {
-        max-width: 230px; 
-        max-height: 230px; 
-        width: auto; 
-        height: auto; 
+        max-width: 230px;
+        max-height: 230px;
+        width: auto;
+        height: auto;
     }
 
 
@@ -486,7 +486,7 @@
 
 .speaker {
   position: absolute;
-  
+
   top: 2px;
   right: 50%;
   transform: translate(50%, 0%);
@@ -571,7 +571,7 @@
     transform: translate(-50%, -50%);
     z-index: 400;
     padding: 12px;
-    width: 90%; 
+    width: 90%;
     display: flex;
     align-items: center;
     height: 42px;

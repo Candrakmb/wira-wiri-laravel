@@ -194,7 +194,10 @@ class MenuApiController extends Controller
             }
         }
 
-
+                // return response()->json([
+                //     'success' => false,
+                //     'message' => $request->all(),
+                // ], 201);
         DB::beginTransaction();
         try {
             $user = auth()->guard('api')->user();
@@ -207,6 +210,10 @@ class MenuApiController extends Controller
                         $gambar->storeAs('public/image/menu', $gambar_menu);
                     }
                 }
+                // return response()->json([
+                //     'success' => false,
+                //     'message' => $request->file('gambar'),
+                // ], 201);
                 $menu = new Menu();
                 $menu->kedai_id = $kedai_id;
                 $menu->nama = $request->nama;

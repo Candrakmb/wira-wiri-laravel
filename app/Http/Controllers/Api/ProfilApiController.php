@@ -313,7 +313,7 @@ class ProfilApiController extends Controller
         $pelanggan = Pelanggan::where('user_id', $user->id)->first();
         DB::beginTransaction();
          try {
-            AlamatPelanggan::create([
+            $alamat = AlamatPelanggan::create([
                 'pelanggan_id' => $pelanggan->id,
                 'alamat' => $request->alamat,
                 'tipe_alamat' => $request->tipe_alamat,
@@ -325,20 +325,14 @@ class ProfilApiController extends Controller
 
             DB::commit();
             return response()->json([
-                'title' => 'Success!',
-                'icon' => 'success',
-                'text' => 'Data Berhasil Ditambah!',
-                'ButtonColor' => '#66BB6A',
-                'type' => 'success'
+                'success' => true,
+                'alamat' => $alamat,
             ], 200);
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
-                'title' => 'Error',
-                'icon' => 'error',
-                'text' => $e->getMessage(),
-                'ButtonColor' => '#EF5350',
-                'type' => 'error'
+                'success' => false,
+                'message' => $e->getMessage(),
             ], 500);
         }
 
@@ -377,7 +371,7 @@ class ProfilApiController extends Controller
 
         DB::beginTransaction();
         try {
-           AlamatPelanggan::where('id',$request->id)->update([
+           $alamat = AlamatPelanggan::where('id',$request->id)->update([
                'alamat' => $request->alamat,
                'tipe_alamat' => $request->tipe_alamat,
                'detail_alamat' => $request->detail_alamat,
@@ -387,20 +381,14 @@ class ProfilApiController extends Controller
 
            DB::commit();
            return response()->json([
-               'title' => 'Success!',
-               'icon' => 'success',
-               'text' => 'Data Berhasil Ditambah!',
-               'ButtonColor' => '#66BB6A',
-               'type' => 'success'
+               'success' => true,
+               'alamat' => $alamat,
            ], 200);
        } catch (\Exception $e) {
            DB::rollback();
            return response()->json([
-               'title' => 'Error',
-               'icon' => 'error',
-               'text' => $e->getMessage(),
-               'ButtonColor' => '#EF5350',
-               'type' => 'error'
+               'success' => false,
+               'message' => $e->getMessage(),
            ], 500);
        }
 
@@ -417,20 +405,14 @@ class ProfilApiController extends Controller
 
             DB::commit();
             return response()->json([
-                'title' => 'Success!',
-                'icon' => 'success',
-                'text' => 'Data Berhasil Dihapus!',
-                'ButtonColor' => '#66BB6A',
-                'type' => 'success'
+                'success' => true,
+               'message' => 'Data alamat berhasil dihapus',
             ], 200);
         } catch(\Exception $e) {
             DB::rollback();
             return response()->json([
-                'title' => 'Error',
-                'icon' => 'error',
-                'text' => $e->getMessage(),
-                'ButtonColor' => '#EF5350',
-                'type' => 'error'
+               'success' => false,
+               'message' => $e->getMessage(),
             ], 500);
         }
     }

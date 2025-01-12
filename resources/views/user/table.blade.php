@@ -5,7 +5,7 @@
           <a href="/user/create" type="button" class="btn btn-primary btn-data" id="btn-create" style="margin: 1em 0 0 0;">
               <i class="fa fa-plus-square"></i> <span>Tambah</span>
           </a>
-      </div>      
+      </div>
     </div>
   </div>
 </div>
@@ -15,8 +15,8 @@
       <div class="col-12">
         <div class="card my-4 rounded-3"  style="border-radius: 20px;">
           <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-            <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-              <h6 class="text-white text-capitalize ps-3">Authors table</h6>
+            <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
+              <h6 class="text-white text-capitalize ps-3">User </h6>
             </div>
           </div>
           <div class="card-body">
@@ -49,7 +49,7 @@
     <div class="col-12">
       <div class="card my-4 rounded-3"  style="border-radius: 20px;">
         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-          <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+          <div class="bg-gradient-info shadow-info border-radius-lg pt-4 pb-3">
             <h6 class="text-white text-capitalize ps-3">restaurant Maps</h6>
           </div>
         </div>

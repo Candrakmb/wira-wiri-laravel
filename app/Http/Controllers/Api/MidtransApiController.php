@@ -13,6 +13,7 @@ class MidtransApiController extends Controller
     {
         // dd($request->all());
         try {
+            $serchingDriver = new WpApiController();
             $serverKey = config('midtrans.server_key');
             $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
             if ($hashed == $request->signature_key) {
@@ -25,11 +26,13 @@ class MidtransApiController extends Controller
                                 $order->update(['status_pembayaran' => '0']);
                             } else {
                                 $order->update(['status_pembayaran' => '1', 'paid_at' => Carbon::now(), 'status_order' => '0']);
+                                $serchingDriver->weightProduct($order->invoice_number);
                             }
                         }
                     }
                     else if ($request->transaction_status == 'settlement') {
                         $order->update(['status_pembayaran' => '1', 'paid_at' => Carbon::now(), 'status_order' => '0']);
+                        $serchingDriver->weightProduct($order->invoice_number);
                     } else if ($request->transaction_status == 'pending') {
                         $order->update(['status_pembayaran' => '0']);
                     } else if ($request->transaction_status == 'deny') {

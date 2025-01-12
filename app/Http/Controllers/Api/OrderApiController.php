@@ -280,8 +280,10 @@ class OrderApiController extends Controller
                 }
             }
             DB::commit();
-            $serchingDriver = new WpApiController();
-            $serchingDriver->weightProduct($order->invoice_number);
+            if($order->metode_pembayaran == 0){
+                $serchingDriver = new WpApiController();
+                $serchingDriver->weightProduct($order->invoice_number);
+            }
             return response()->json([
                 'success' => true,
                 'data_order' => $order

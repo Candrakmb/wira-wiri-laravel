@@ -18,7 +18,7 @@ class OrderController extends Controller
         'title' => 'Order',
         'modul' => 'order',
     ];
-    
+
     function order(){
         $this->data['type'] = "index";
         $this->data['data'] = null;
@@ -56,8 +56,8 @@ class OrderController extends Controller
                     '0' => '<div class="badge rounded-pill bg-info">COD</div>',
                     '1' => '<div class="badge rounded-pill bg-primary">Midtrans</div>'
                 ];
-                $pembayaran = isset($paymentMethod[$row->metode_pembayaran]) ? 
-                    $paymentMethod[$row->metode_pembayaran] : 
+                $pembayaran = isset($paymentMethod[$row->metode_pembayaran]) ?
+                    $paymentMethod[$row->metode_pembayaran] :
                     '<div class="badge rounded-pill bg-secondary">Unknown</div>';
                 return '<div class="text-center">
                             <div class="btn-group btn-group-solid mx-3">
@@ -68,13 +68,18 @@ class OrderController extends Controller
             ->addColumn('status', function($row) {
                 $orderStatus = [
                     '0' => '<div class="badge rounded-pill bg-info">Proses</div>',
-                    '1' => '<div class="badge rounded-pill bg-primary">Antar</div>',
-                    '2' => '<div class="badge rounded-pill bg-success">Selesai</div>',
-                    '3' => '<div class="badge rounded-pill bg-danger">Batal</div>'
+                    '1' => '<div class="badge rounded-pill bg-secondary">mendapatkan driver</div>',
+                    '2' => '<div class="badge rounded-pill bg-secondary">menuju kedai</div>',
+                    '3' => '<div class="badge rounded-pill bg-secondary">menuju kedai</div>',
+                    '4' => '<div class="badge rounded-pill bg-secondary">menuju kedai</div>',
+                    '5' => '<div class="badge rounded-pill bg-secondary">driver menunggu dikedai</div>',
+                    '6' => '<div class="badge rounded-pill bg-secondary">mengantar</div>',
+                    '7' => '<div class="badge rounded-pill bg-success">Selesai</div>',
+                    '8' => '<div class="badge rounded-pill bg-danger">Batal</div>'
                 ];
-                $status = isset($orderStatus[$row->status_order]) ? 
-                    $orderStatus[$row->status_order] : 
-                    '<div class="badge rounded-pill bg-secondary">Pembayaran</div>';
+                $status = isset($orderStatus[$row->status_order]) ?
+                    $orderStatus[$row->status_order] :
+                    '<div class="badge rounded-pill bg-secondary">Tidak diketahui</div>';
                 return '<div class="text-center">
                             <div class="btn-group btn-group-solid mx-3">
                                 '.$status.'
@@ -82,8 +87,8 @@ class OrderController extends Controller
                         </div>';
             })
             ->addColumn('driver', function($row) {
-                $driver = $row->driver_id ? 
-                    Driver::with('user')->find($row->driver_id)->user->name : 
+                $driver = $row->driver_id ?
+                    Driver::with('user')->find($row->driver_id)->user->name :
                     'belum mendapatkan driver';
                 return '<div class="text-center">
                             <div class="btn-group btn-group-solid mx-3">
@@ -102,5 +107,5 @@ class OrderController extends Controller
             ->rawColumns(['action', 'pembayaran', 'status', 'driver', 'pelanggan'])
             ->make(true);
     }
-    
+
 }
