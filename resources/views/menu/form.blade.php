@@ -85,6 +85,7 @@
                                                 </div>
                                                 <input type="hidden" name="oldImg[]" value="{{$item->gambar}}">
                                                 <input type="file" class="form-control fileImg" name="gambar[]">
+                                                <p>texs</p>
                                             </div>
                                         </div>
                                     </div>

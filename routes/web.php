@@ -22,9 +22,9 @@ Route::get('/', [AuthenticatedSessionController::class, 'create'])
                 ->name('login');
 
 Route::middleware(['auth'])->group(function () {
-
+    Route::get('/home',[DashboardAdminController::class,'index'])->name('admin.dashboard');
 Route::prefix('dashboard')->name('dashboard.')->group(function(){
-    Route::get('/',[DashboardAdminController::class,'index'])->name('admin.dashboard');
+
     Route::post('/table', [DashboardAdminController::class, 'table'])->name('table');
 });
 

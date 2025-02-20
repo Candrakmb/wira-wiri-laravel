@@ -66,7 +66,7 @@
                     {
                         data: 'role',
                         name: 'role',
-                        class: 'text-left'  
+                        class: 'text-left'
                     },
                     {
                         data: 'action',
@@ -173,12 +173,12 @@
                         <div class="row">
                             <div class="col-md-12 mb-1">
                             <div class="d-flex justify-content-center" data-id="${no}">
-                                <div class="container_file"> 
-                                <div class="header_file img${no}"> 
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
+                                <div class="container_file">
+                                <div class="header_file img${no}">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
                                     <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg> <p>Browse img to upload profil!</p>
-                                </div> 
-                                <input type="file" class="form-control fileImg" name="profil[]"> 
+                                </div>
+                                <input type="file" class="form-control fileImg" name="profil[]">
                                 </div>
                             </div>
                         </div>
@@ -298,12 +298,12 @@
                         <div class="row">
                             <div class="col-md-12 mb-1">
                             <div class="d-flex justify-content-center" data-id="${no}">
-                                <div class="container_file"> 
-                                <div class="header_file img${no}"> 
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
+                                <div class="container_file">
+                                <div class="header_file img${no}">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
                                     <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg> <p>Browse img to upload profil!</p>
-                                </div> 
-                                <input type="file" class="form-control fileImg" name="profil[]"> 
+                                </div>
+                                <input type="file" class="form-control fileImg" name="profil[]">
                                 </div>
                             </div>
                         </div>
@@ -365,7 +365,7 @@
         var addData = function() {
             $('.role').unbind().change(function() {
                 var selectedRole = $(this).val();
-               
+
                 var lengthUser = $('.name').length;
                 console.log(selectedRole,lengthUser);
                 var data = "";
@@ -392,12 +392,12 @@
                         <div class="row">
                             <div class="col-md-12  mb-1">
                             <div class="d-flex justify-content-center" data-id="${no}">
-                                <div class="container_file"> 
-                                <div class="header_file img${no}"> 
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
+                                <div class="container_file">
+                                <div class="header_file img${no}">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
                                     <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg> <p>Browse img to upload profil!</p>
-                                </div> 
-                                <input type="file" class="form-control fileImg" name="profil[]"> 
+                                </div>
+                                <input type="file" class="form-control fileImg" name="profil[]">
                                 </div>
                             </div>
                         </div>
@@ -517,12 +517,12 @@
                         <div class="row">
                             <div class="col-md-12 mb-1">
                             <div class="d-flex justify-content-center" data-id="${no}">
-                                <div class="container_file"> 
-                                <div class="header_file img${no}"> 
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
+                                <div class="container_file">
+                                <div class="header_file img${no}">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
                                     <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg> <p>Browse img to upload profil!</p>
-                                </div> 
-                                <input type="file" class="form-control fileImg" name="profil[]"> 
+                                </div>
+                                <input type="file" class="form-control fileImg" name="profil[]">
                                 </div>
                             </div>
                         </div>
@@ -571,7 +571,7 @@
                 // Mengosongkan dan mengisi kembali konten div add_data
                 $('.card_input').empty().append(data);
                 imgMenu();
-                } 
+                }
             });
         };
 
@@ -591,7 +591,7 @@
                     };
                     reader.readAsDataURL(file);
                 } else {
-                    imgContaine += `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
+                    imgContaine += `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
                                     <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg> <p>harus berupa gambar!</p>`
                     cardImg.empty().append(imgContaine);
                 }
@@ -785,39 +785,41 @@
             });
         }
         @if ($type == 'index')
-        var map = function (){
-            var map = L.map('map').setView([-7.152186, 111.883674],15);
+        var map = function () {
+            var map = L.map('map').setView([-7.152186, 111.883674], 15);
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             }).addTo(map);
 
-            const LeafIcon = L.Icon.extend({
-                options: {
-                    iconSize: [50, 70], // Sesuaikan dengan ukuran yang kamu inginkan
-                    iconAnchor: [25, 70], // Sesuaikan dengan posisi anchor yang tepat
-                    popupAnchor: [0, -35] // Jika ingin menampilkan popup
-                }
-            });
+            // const LeafIcon = L.Icon.extend({
+            //     options: {
+            //         iconSize: [50, 70], // Ukuran ikon
+            //         iconAnchor: [25, 70], // Posisi anchor ikon
+            //         popupAnchor: [0, -35] // Posisi popup relatif terhadap ikon
+            //     }
+            // });
 
-           
-            const greenIcon = new LeafIcon({iconUrl: '/assets/icon_maps/restaurant.png'});
-            let driverMaps = @json($driver_maps);
+            // const greenIcon = new LeafIcon({ iconUrl: '/assets/icon_maps/restaurant.png' });
+
+            let driverMaps = @json($kedai_maps);
             driverMaps.forEach(item => {
-                const statusBadge = item.status == '1' ? '<div class="badge rounded-pill bg-success">ON</div>' : '<div class="badge rounded-pill bg-info">Mendapatkan pesanan</div>';
+                const statusBadge = item.status == '1'
+                    ? '<span class="badge rounded-pill bg-success">Buka</span>'
+                    : '<span class="badge rounded-pill bg-danger">Tutup</span>';
 
-                // Menggunakan backticks (`) untuk memungkinkan multiline strings dan interpolation
-                const popupContent = `<div class="card_profile">
-                                        <div class="profileImage">
-                                        <svg viewBox="0 0 128 128"><circle r="60" fill="transparent" cy="64" cx="64"></circle><circle r="48" fill="transparent" cy="64" cx="64"></circle><path fill="#191919" d="m64 14a32 32 0 0 1 32 32v41a6 6 0 0 1 -6 6h-52a6 6 0 0 1 -6-6v-41a32 32 0 0 1 32-32z"></path><path opacity="1" fill="#191919" d="m62.73 22h2.54a23.73 23.73 0 0 1 23.73 23.73v42.82a4.45 4.45 0 0 1 -4.45 4.45h-41.1a4.45 4.45 0 0 1 -4.45-4.45v-42.82a23.73 23.73 0 0 1 23.73-23.73z"></path><circle r="7" fill="#fbc0aa" cy="65" cx="89"></circle><path fill="#4bc190" d="m64 124a59.67 59.67 0 0 0 34.69-11.06l-3.32-9.3a10 10 0 0 0 -9.37-6.64h-43.95a10 10 0 0 0 -9.42 6.64l-3.32 9.3a59.67 59.67 0 0 0 34.69 11.06z"></path><path opacity=".3" fill="#356cb6" d="m45 110 5.55 2.92-2.55 8.92a60.14 60.14 0 0 0 9 1.74v-27.08l-12.38 10.25a2 2 0 0 0 .38 3.25z"></path><path opacity=".3" fill="#356cb6" d="m71 96.5v27.09a60.14 60.14 0 0 0 9-1.74l-2.54-8.93 5.54-2.92a2 2 0 0 0 .41-3.25z"></path><path fill="#fff" d="m57 123.68a58.54 58.54 0 0 0 14 0v-25.68h-14z"></path><path stroke-width="14" stroke-linejoin="round" stroke-linecap="round" stroke="#fbc0aa" fill="none" d="m64 88.75v9.75"></path><circle r="7" fill="#fbc0aa" cy="65" cx="39"></circle><path fill="#ffd8ca" d="m64 91a25 25 0 0 1 -25-25v-16.48a25 25 0 1 1 50 0v16.48a25 25 0 0 1 -25 25z"></path><path fill="#191919" d="m91.49 51.12v-4.72c0-14.95-11.71-27.61-26.66-28a27.51 27.51 0 0 0 -28.32 27.42v5.33a2 2 0 0 0 2 2h6.81a8 8 0 0 0 6.5-3.33l4.94-6.88a18.45 18.45 0 0 1 1.37 1.63 22.84 22.84 0 0 0 17.87 8.58h13.45a2 2 0 0 0 2.04-2.03z"></path><path style="fill:none;stroke-linecap:round;stroke:#fff;stroke-miterlimit:10;stroke-width:2;opacity:.1" d="m62.76 36.94c4.24 8.74 10.71 10.21 16.09 10.21h5"></path><path style="fill:none;stroke-linecap:round;stroke:#fff;stroke-miterlimit:10;stroke-width:2;opacity:.1" d="m71 35c2.52 5.22 6.39 6.09 9.6 6.09h3"></path><circle r="3" fill="#515570" cy="62.28" cx="76"></circle><circle r="3" fill="#515570" cy="62.28" cx="52"></circle><ellipse ry="2.98" rx="4.58" opacity=".1" fill="#f85565" cy="69.67" cx="50.42"></ellipse><ellipse ry="2.98" rx="4.58" opacity=".1" fill="#f85565" cy="69.67" cx="77.58"></ellipse><g stroke-linejoin="round" stroke-linecap="round" fill="none"><path stroke-width="4" stroke="#fbc0aa" d="m64 67v4"></path><path stroke-width="2" stroke="#515570" opacity=".2" d="m55 56h-9.25"></path><path stroke-width="2" stroke="#515570" opacity=".2" d="m82 56h-9.25"></path></g><path opacity=".4" fill="#f85565" d="m64 84c5 0 7-3 7-3h-14s2 3 7 3z"></path><path fill="#f85565" d="m65.07 78.93-.55.55a.73.73 0 0 1 -1 0l-.55-.55c-1.14-1.14-2.93-.93-4.27.47l-1.7 1.6h14l-1.66-1.6c-1.34-1.4-3.13-1.61-4.27-.47z"></path></svg>
-                                        </div>
-                                        <div class="textContainer_profile">
-                                            <p class="name_profile">${item.user.name}</p>
-                                            ${statusBadge}
-                                        </div>
-                                        </div>`;
-                L.marker([item.latitude, item.longitude], {icon: greenIcon}).addTo(map).bindPopup(popupContent);
+                const popupContent = `
+                    <div style="text-align: center;">
+                        <strong>${item.user.name}</strong><br>
+                        ${statusBadge}
+                    </div>
+                `;
+                
+                L.marker([item.latitude, item.longitude])
+                    .addTo(map)
+                    .bindPopup(popupContent);
             });
         }
+
         @endif
         return {
             init: function() {

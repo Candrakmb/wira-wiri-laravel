@@ -112,13 +112,14 @@ class ProfilApiController extends Controller
 
     public function update_profil(Request $request){
         $user = auth()->guard('api')->user();
+
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'no_whatsapp' => ['required', 'string', 'regex:/^\+62\d{8,12}$/'],
         ];
 
-        if ($user->hasRole('driver')) {
+        if ($user->getRoleNames()->contains('driver')) {
             $rules = array_merge($rules, [
                 'tanggal_lahir' => 'required|date',
                 'jenis_kelamin' => 'required',
@@ -161,15 +162,23 @@ class ProfilApiController extends Controller
 
             // Handle image upload
             if ($request->hasFile('profil')) {
+                // return response()->json([
+                //     'success' => false,
+                //     'data' => $profil_menu = Str::uuid() . '.' . $request->file('profil')->extension(),
+                // ], 200);
                 $placeImg = match ($role) {
                     'user' => 'public/image/pelanggan',
                     'driver' => 'public/image/driver',
                     default => 'public/image/kedai',
                 };
-
-                foreach ($request->file('profil') as $profil) {
-                    $profil_menu = Str::uuid() . '.' . $profil->extension();
-                    $profil->storeAs($placeImg, $profil_menu);
+                if($role == 'kedai' || $role == 'driver'){
+                    foreach ($request->file('profil') as $profil) {
+                        $profil_menu = Str::uuid() . '.' . $profil->extension();
+                        $profil->storeAs($placeImg, $profil_menu);
+                    }
+                } else if ($role == 'user') {
+                    $profil_menu = Str::uuid() . '.' . $request->file('profil')->extension();
+                    $request->file('profil')->storeAs($placeImg, $profil_menu);
                 }
 
                 $img = $profil_menu;

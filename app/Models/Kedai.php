@@ -77,7 +77,7 @@ class Kedai extends Model
     // Accessor untuk URL gambar
     public function getImgUrlAttribute()
     {
-        return $this->img ? url('storage/image/kedai/' . $this->img) : url('assets/img/no-image.jpg');
+        return $this->img ? url('storage/image/kedai/' . $this->img) : url('no image.png');
     }
 
 

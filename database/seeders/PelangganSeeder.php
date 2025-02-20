@@ -2,24 +2,20 @@
 
 namespace Database\Seeders;
 
-use App\Models\Driver;
+use App\Models\Pelanggan;
 use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Faker\Factory as Faker;
 use Illuminate\Support\Facades\Hash;
 
-class DriverSeeder extends Seeder
+class PelangganSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::beginTransaction();
 
@@ -27,7 +23,7 @@ class DriverSeeder extends Seeder
 
         $faker = Faker::create();
 
-        for ($i = 0; $i < 30; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             // Create a new user
             $user = User::create([
                 'name' =>  fake('id_ID')->firstName() . ' ' . fake('id_ID')->lastName(), // Nama sesuai format Indonesia
@@ -36,17 +32,12 @@ class DriverSeeder extends Seeder
             ]);
 
             // Assign role 'driver'
-            $user->assignRole('driver');
+            $user->assignRole('user');
 
             // Create a new driver associated with the user
-            Driver::create([
+            Pelanggan::create([
                 'user_id' => $user->id,
-                'no_whatsapp' => '+6282230313377',
-                'tanggal_lahir' => fake()->date('Y-m-d'),
-                'alamat' => fake('id_ID')->address(),
-                'jenis_kelamin' => $faker->randomElement(['Laki-laki', 'Perempuan']),
-                'no_plat' => strtoupper($faker->bothify('?? #### ??')),
-                'status' => '0'
+                'no_whatsapp' => '+6282230313388',
             ]);
         }
 
@@ -54,6 +45,5 @@ class DriverSeeder extends Seeder
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollback();
         }
-
     }
 }

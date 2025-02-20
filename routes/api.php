@@ -51,16 +51,19 @@ Route::group(['middleware' => ['auth:api','refresh.token']], function () {
         Route::get('/update/{id}',[MenuApiController::class,'update']);
         Route::post('/createform',[MenuApiController::class,'createform']);
         Route::post('/updateform',[MenuApiController::class,'updateform']);
+        Route::get('/random',[MenuApiController::class,'randomKedaiAndMenu']);
         Route::delete('/deleteform/{id}',[MenuApiController::class,'deleteform']);
     });
 
     Route::prefix('order')->name('order.')->group(function(){
         Route::get('/{invoice}',[OrderApiController::class,'data_order']);
         Route::post('/create',[OrderApiController::class,'create_order']);
+        Route::post('/calculate_ongkir',[OrderApiController::class,'calculateOngkir']);
         Route::post('/update/status',[OrderApiController::class,'updateStatusOrder']);
         Route::post('/update/driver',[OrderApiController::class, 'addDriverOrder']);
         Route::post('/posisi/driver',[OrderApiController::class, 'positionDriver']);
         Route::get('/view/kedai',[OrderApiController::class, 'orderViewKedai']);
+        Route::get('/view/progress',[OrderApiController::class, 'getOrderProgress']);
     });
 
     Route::prefix('message')->name('message.')->group(function(){

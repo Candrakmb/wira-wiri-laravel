@@ -195,12 +195,13 @@
                         <div class="col-md-6 mt-2">
                             <div class="col-md-12 mt-5">
                             <div class="d-flex justify-content-center" data-id="${no}">
-                                <div class="container_file"> 
-                                <div class="header_file img${no}"> 
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
+                                <div class="container_file">
+                                <div class="header_file img${no}">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
                                     <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg> <p>Browse img to upload!</p>
-                                </div> 
-                                <input type="file" class="form-control fileImg" name="gambar[]"> 
+                                </div>
+                                <input type="file" class="form-control fileImg" name="gambar[]">
+                                <p class="alertMax" ></p>
                                 </div>
                             </div>
                         </div>
@@ -263,7 +264,7 @@
                     </div>
                 </div>`;
                     $('.card_menu').append(html);
-                    deleteRow(); 
+                    deleteRow();
                     addKategori()
                     imgMenu();
                     addPilihan();
@@ -288,33 +289,48 @@
                     });
                 }else{
                     $(this).parent().parent().parent().parent().parent().remove();
-                } 
+                }
             });
         }
 
 
 
-        var imgMenu = function (){
-            $('.fileImg').unbind().change(function(){
+        var imgMenu = function () {
+            $('.fileImg').unbind().change(function () {
                 var imgId = $(this).parent().parent().attr('data-id');
-                var cardImg = $('.img'+ imgId);
+                var cardImg = $('.img' + imgId);
                 var file = this.files[0];
                 var imgContaine = "";
 
-                if (file && file.type.startsWith('image')) {
-                    var reader = new FileReader();
-                    reader.onload = function(e) {
-                        imgContaine += `<img src="${e.target.result}" alt="">`
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) { // Cek jika ukuran lebih dari 2MB
+                        imgContaine = `<p style="color: red; font-weight: bold;">Ukuran file terlalu besar! Maksimal 2MB.</p>`;
+                        cardImg.append(imgContaine);
+                        console.log('apakah masuk sini')
+                        this.value = ""; // Reset input file
+                        return; // Hentikan eksekusi lebih lanjut
+                        
+                    }
+
+                    if (file.type.startsWith('image')) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            imgContaine += `<img src="${e.target.result}" alt="">`
+                            cardImg.empty().append(imgContaine);
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        imgContaine += `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15"
+                                                stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                        <p>Harus berupa gambar!</p>`;
                         cardImg.empty().append(imgContaine);
-                    };
-                    reader.readAsDataURL(file);
-                } else {
-                    imgContaine += `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
-                                    <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg> <p>harus berupa gambar!</p>`
-                    cardImg.empty().append(imgContaine);
+                    }
                 }
-            })
+            });
         }
+
 
         var noKategori = 0;
         var addKategori = function (){
@@ -367,7 +383,7 @@
                                             <p class="help-block" style="display: none;"></p>
                                         </div>
                                         <div class="col-md-3">
-                                            <label for="max_pilih[]" class="label1">Kategori</label><span class="required">*</span>
+                                            <label for="max_pilih[]" class="label1">Maksimal pilih</label><span class="required">*</span>
                                             <input type="text" id="max_pilih" placeholder="bisa pilih berapa?" name="max_pilih[]" class="form-control input max_pilih" required>
                                             <p class="help-block" style="display: none;"></p>
                                         </div>
@@ -441,7 +457,7 @@
             })
         }
 
-        
+
         var addPilihan = function() {
             $('.pilih').unbind().click(function() {
                 var pilihNo = $(this).parent().parent().parent().attr('data-id');
@@ -490,7 +506,7 @@
                                     </div>
                                 </div>
                                 </div>
-                            
+
                         `;
                 var buttonAdd = "";
                 buttonAdd += `<div class="col-md-6 mt-2 mb-2">
@@ -520,7 +536,7 @@
             });
         }
 
-       
+
         var create = function() {
             $('#simpan').click(function(e) {
                 e.preventDefault();
@@ -722,7 +738,7 @@
             });
 
             const greenIcon = new LeafIcon({iconUrl: '/assets/icon_maps/restaurant.png'});
-            
+
             let kedaiMaps = @json($kedai_maps);
             kedaiMaps.forEach(item => {
                 const statusBadge = item.status == '1' ? '<div class="badge rounded-pill bg-success">Buka</div>' : '<div class="badge rounded-pill bg-danger">Tutup</div>';
@@ -754,7 +770,7 @@
                 setData();
                 create();
                 hapus();
-                
+
             }
         }
     }();
@@ -766,6 +782,6 @@
         });
         $.fn.dataTable.ext.errMode = 'none';
         data.init();
-        
+
     });
 </script>

@@ -6,6 +6,7 @@ use App\Events\NotifyDriver;
 use App\Events\NotifyKedai;
 use App\Events\PosisiDriver;
 use App\Events\StatusOrder;
+use App\Helpers\Haversine;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
@@ -23,6 +24,7 @@ use App\Notifications\StatusOrderNotification;
 use App\Services\Midtrans\CreateSnapTokenService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 class OrderApiController extends Controller
@@ -41,6 +43,124 @@ class OrderApiController extends Controller
 
          return view('midtrans.show', compact('order', 'snapToken'));
     }
+
+    public function getOrderProgress()
+    {
+        try {
+            $userAuth = auth()->guard('api')->user();
+            $order = null;
+
+            switch (true) {
+                case $userAuth->getRoleNames()->contains('driver'):
+                    $driver = Driver::where('user_id', $userAuth->id)->first();
+                    if (!$driver) {
+                        return response()->json(['success' => false, 'text' => 'Driver tidak ditemukan'], 404);
+                    }
+                    $order = Order::with([
+                        'pelanggan', 'pelanggan.user', 'driver', 'driver.user',
+                    ])
+                    ->where('driver_id', $driver->id)
+                    ->whereBetween('status_order', [1,6])
+                    ->whereDate('created_at', Carbon::today())
+                    ->first();
+                    break;
+
+                case $userAuth->getRoleNames()->contains('user'):
+                    $pelanggan = Pelanggan::where('user_id', $userAuth->id)->first();
+                    if (!$pelanggan) {
+                        return response()->json(['success' => false, 'text' => 'Pelanggan tidak ditemukan'], 404);
+                    }
+                    $order = Order::with([
+                        'pelanggan', 'pelanggan.user', 'driver', 'driver.user',
+                    ])
+                    ->where('pelanggan_id', $pelanggan->id)
+                    ->whereBetween('status_order', [1,6])
+                    ->whereDate('created_at', Carbon::today())
+                    ->first();
+                    break;
+
+                default:
+                    return response()->json([
+                        'success' => false,
+                        'text' => 'Tidak memiliki akses',
+                    ], 401);
+            }
+
+            return response()->json([
+                'success' => (bool) $order,
+                'order' => $order,
+                'text' => $order ? 'Order ditemukan' : 'Order tidak ditemukan',
+            ], $order ? 200 : 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'text' => 'Terjadi kesalahan: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function calculateOngkir(Request $request)
+    {
+        $request->validate([
+            'kedai' => 'required', // Format: [lng, lat]
+            'destination' => 'required|array', // Format: [lng, lat]
+        ]);
+
+        $getDataKedai = Kedai::find($request->kedai);
+
+        $kedai = [ $getDataKedai->longitude, $getDataKedai->latitude];        // Contoh: [106.827153, -6.175110] (Jakarta)
+        $destination = $request->input('destination'); // Contoh: [107.619122, -6.917464] (Bandung)
+        $apiKey = env('ORS_API_KEY'); // Simpan API Key di .env
+
+        // Panggil OpenRouteService Directions API
+        // $response = Http::withHeaders([
+        //     'Authorization' => $apiKey,
+        //     'Content-Type' => 'application/json',
+        // ])->post('https://api.openrouteservice.org/v2/directions/driving-car', [
+        //     'coordinates' => [$kedai, $destination],
+        //     'instructions' => false,
+        // ]);
+
+        $distanceKm = Haversine::calculateDistance($getDataKedai->longitude, $getDataKedai->latitude, $destination[0], $destination[1]);
+
+        // if ($response->successful()) {
+            // $data = $response->json();
+
+            // // Ambil rincian jarak (dalam meter) dan ubah ke kilometer
+            // $distanceMeters = $data['routes'][0]['summary']['distance'] ?? null;
+            // $distanceKm = $distanceMeters ? round($distanceMeters / 1000) : null;
+
+            // Perhitungan ongkir
+            $baseRate = 7000; // Ongkir dasar untuk 5 km pertama
+            $additionalRate = 3000; // Tambahan ongkir per km di atas 5 km
+            $ongkir = 0;
+
+            if ($distanceKm !== null) {
+                if ($distanceKm <= 4) {
+                    $ongkir = $baseRate;
+                } else {
+                    $extraDistance = $distanceKm - 4; // Jarak di atas 5 km
+                    $ongkir = $baseRate + ceil($extraDistance) * $additionalRate;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'distance_km' => $distanceKm,
+                'ongkir' => $ongkir,
+            ], 200);
+        // }
+
+        return response()->json([
+            'success' => false,
+            'error' => 'Failed to calculate distance',
+            'response' => $response->json(),
+        ], $response->status());
+    }
+
+
+
     public function data_order($invoice){
         $order = Order::where('invoice_number',$invoice)->first();
 
@@ -74,19 +194,13 @@ class OrderApiController extends Controller
             }
 
             if($order->driver_id != null) {
-                $driver =  Driver::select('id', 'user_id', 'no_whatsapp','no_plat','latitude','longitude')
-                ->with(['user' => function($query) {
-                    $query->select('id', 'name', 'email');
-                }])
+                $driver =  Driver::with(['user'])
                 ->where('id', $order->driver_id)
                 ->first();
             }else {
                 $driver= null;
             }
-            $pelanggan = Pelanggan::select('id', 'user_id', 'no_whatsapp')
-                ->with(['user' => function($query) {
-                    $query->select('id', 'name', 'email');
-                }])
+            $pelanggan = Pelanggan::with(['user'])
                 ->where('id', $order->pelanggan_id)
                 ->first();
             // $orderDetail = OrderDetail::with(['orderEkstra','orderEkstra.menuDetail','orderEkstra.menuDetail.kategoriPilihan','menu'])->where('order_id',$order->id)->get();

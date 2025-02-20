@@ -66,14 +66,13 @@ class StatusOrderNotification extends Notification
                 break;
             case 8:
                 $title = "Pesanan dibatalkan";
-                $body = "Yah, pesananmu dibatalkan karena suatu hal";
+                $body = "Maaf pesanan mu tidak mendapatkan driver";
                 break;
             default:
                 $title = "Status tidak dikenal";
                 $body = "Status order tidak dikenal.";
         }
 
-        Log::info('Notifikasi dikirim ke: ' . $url);
 
         return (new WebPushMessage())
             ->title($title)

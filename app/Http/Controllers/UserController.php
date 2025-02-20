@@ -26,6 +26,7 @@ class UserController extends Controller
         $this->data['type'] = "index";
         $this->data['data'] = null;
         $this->data['driver_maps'] = Driver::whereNot('status','0')->with(['user'])->get();
+        $this->data['kedai_maps'] = Kedai::with(['user'])->get();
     	return view($this->data['modul'].'.index', $this->data);
     }
 

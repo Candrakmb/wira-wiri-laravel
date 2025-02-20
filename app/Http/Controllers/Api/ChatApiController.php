@@ -8,6 +8,8 @@ use App\Models\Driver;
 use App\Models\Message;
 use App\Models\Order;
 use App\Models\Pelanggan;
+use App\Models\User;
+use App\Notifications\ChatNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -101,6 +103,8 @@ class ChatApiController extends Controller
                     $chatMessage->load(['sender:id,name', 'receiver:id,name']);
 
                     broadcast(new SendMessage($chatMessage))->toOthers();
+                    $user = User::where('id', $chatMessage->receiver_id)->first();
+                    $user->notify(new ChatNotification($chatMessage));
                     DB::commit();
                     return response()->json([
                         'success' => true,

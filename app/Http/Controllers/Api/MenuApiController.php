@@ -17,6 +17,37 @@ use Illuminate\Support\Str;
 
 class MenuApiController extends Controller
 {
+    public function randomKedaiAndMenu()
+    {
+        $getRandomKedai = Kedai::with('user')
+            ->where('status', '1')
+            ->inRandomOrder()
+            ->limit(5)
+            ->get();
+
+        if(!$getRandomKedai){
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak ada kedai yang ditemukan',
+            ], 404);
+        }
+        // Ambil ID kedai yang didapat
+        $kedaiIds = $getRandomKedai->pluck('id');
+
+        // Cari menu berdasarkan kedai yang terpilih, ambil satu menu secara acak per kedai
+        $getRandomMenu = Menu::whereIn('kedai_id', $kedaiIds)
+            ->inRandomOrder()
+            ->limit(5)
+            ->get();
+
+            return response()->json([
+                'success'  => true,
+                'kedai_random'    => $getRandomKedai,
+                'menu_random' => $getRandomMenu,
+            ], 200);
+
+    }
+
     public function get_kedai(Request $request){
 
         $search = $request->search;
@@ -58,6 +89,11 @@ class MenuApiController extends Controller
             $kedai = Kedai::with(['user'])->where('id', $id)->first();
             $menu = Menu::with(['customOptions', 'kategori','customOptions.menuDetail'])->where('kedai_id', $id)->orderBy('menus.id', 'desc')->get();
 
+            $getRandomMenu = Menu::with(['customOptions', 'kategori','customOptions.menuDetail'])->where('kedai_id', $id)
+            ->limit(2)
+            ->orderBy('menus.id', 'desc')
+            ->get();
+
             if (!$menu) {
                 return response()->json([
                     'success' => false,
@@ -65,10 +101,16 @@ class MenuApiController extends Controller
                 ], 500);
             }
 
+            $menuWithKategori = $menu->groupBy(function($item) {
+                return $item->kategori->nama; // 'nama' adalah kolom dari kategori
+            });
+
             return response()->json([
                 'success' => true,
                 'kedai' => $kedai,
                 'menu' => $menu,
+                'viewMenu' => $menuWithKategori,
+                'menu_random' => $getRandomMenu,
             ], 200);
         }
 
